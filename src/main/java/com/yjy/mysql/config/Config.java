@@ -60,9 +60,8 @@ public class Config {
         if (packages.contains(",")) {
             Set<String> set = new HashSet<String>();
             for (String package1 : packages.split(",")) {
-                if ((package1 = package1.trim()).length() > 0) {
+                if ((package1 = package1.trim()).length() > 0)
                     set.add(package1);
-                }
             }
             DB_PACKAGES = set.toArray(new String[]{});
         } else
