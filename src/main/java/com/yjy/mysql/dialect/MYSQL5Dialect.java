@@ -7,9 +7,7 @@ import com.yjy.mysql.comment.Field;
 import com.yjy.mysql.comment.Id;
 import com.yjy.mysql.config.Config;
 import com.yjy.mysql.driverManager.DriverManagerDataSource;
-import com.yjy.mysql.exception.DaoException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -21,17 +19,16 @@ import static com.yjy.mysql.config.Config.*;
 
 public class MYSQL5Dialect {
 
-    private final Logger log = LoggerFactory.getLogger(MYSQL5Dialect.class);
-
-    private List<String> sql = new ArrayList<String>();
+    private List<String> sqlList = new ArrayList<String>();
     private List<String> alterUpdates = new ArrayList<String>();
-    private String[] packages;
-    private String auto;
-    private boolean showSql;
-    private DataSource dataSource;
+    private String[] packages; // 表实体所在包
+    private String auto; // 更新方式
+    private boolean showSql; // 是否打印执行的sql语句
+    private DataSource dataSource; // 数据库连接
     private Connection connect;
 
     public MYSQL5Dialect(String configPath) {
+        // 加载配置参数
         Config.loadConfig(configPath);
         this.dataSource = new DriverManagerDataSource(DB_DRIVER_NAME, DB_URL, DB_USERNAME, DB_PASSWORD);
         this.packages = DB_PACKAGES;
@@ -39,180 +36,216 @@ public class MYSQL5Dialect {
         this.showSql = DB_SHOW_SQL;
     }
 
-    public void init() throws SQLException, DaoException {
-        this.connect = this.dataSource.getConnection();
-        List<Class<?>> clazzs = new ArrayList<Class<?>>();
-        for (String package1 : this.packages) {
-            clazzs.addAll(ScanPackage.getClassesByPackageName(package1));
-        }
-        if ("create".equals(this.auto)) {
-            create(clazzs);
-        } else if ("update".equals(this.auto)) {
-            update(clazzs);
-        }
-        this.sql.addAll(this.alterUpdates);
-        Statement statement = this.connect.createStatement();
-        for (String sql : this.sql) {
-            if (this.showSql) {
-                System.out.println(sql);
+    /**
+     * 初始化入口
+     */
+    public void init() {
+        try {
+            this.connect = this.dataSource.getConnection();
+            List<Class<?>> clazzList = new ArrayList<Class<?>>();
+            for (String package1 : this.packages) {
+                clazzList.addAll(ScanPackage.getClassesByPackageName(package1));
             }
-            statement.addBatch(sql);
+            if ("create".equals(this.auto)) {
+                create(clazzList);
+            } else if ("update".equals(this.auto)) {
+                update(clazzList);
+            }
+            this.sqlList.addAll(this.alterUpdates);
+            Statement statement = this.connect.createStatement();
+            for (String sql : this.sqlList) {
+                if (this.showSql) {
+                    System.out.println(sql);
+                }
+                statement.addBatch(sql);
+            }
+            statement.executeBatch();
+            this.connect.close();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        statement.executeBatch();
-        this.connect.close();
     }
 
-    private void update(List<Class<?>> clazzs) {
-        for (Class<?> clazz : clazzs) {
-            java.lang.reflect.Field[] arrayOfField;
-            String sqls = "";
-            String idField = "";
+    /**
+     * 重新创建表
+     * @param clazzList 表实体列表
+     */
+    private void create(List<Class<?>> clazzList) {
+        for (Class<?> clazz : clazzList) {
+            Entity entity; // 表实体
+            String tableName;
+            // 是否表实体
             if (!clazz.isAnnotationPresent(Entity.class)) {
                 continue;
             }
-            // 获取注解实体
-            Entity entity = clazz.getAnnotation(Entity.class);
-            // 获取表名
-            String tableName = entity.tableName();
-            // 是否需要检测表结构
-            if (!entity.check()) {
+            // 是否需要检测表结构, 如果不需, 则跳过该表实体
+            if (!(entity = clazz.getAnnotation(Entity.class)).check()) {
                 continue;
             }
-            if (tableName.equals("")) {
-                throw new RuntimeException("类:[" + clazz.getName() + "]未指明正确的表名!");
+            // 验证表名
+            if (StringUtils.isBlank((tableName = entity.tableName()))) {
+                throw new RuntimeException(clazz.getName() + " 未指定或指定了错误的表名 : " + tableName);
             }
-            sqls += "CREATE TABLE IF NOT EXISTS " + tableName + "(\n";
-            java.lang.reflect.Field[] fields = clazz.getDeclaredFields();
-            int j = (arrayOfField = fields).length;
-            for (int i = 0; i < j; ++i) {
-                java.lang.reflect.Field field = arrayOfField[i];
-                if (!(field.isAnnotationPresent(Field.class))) {
-                    continue;
-                }
-                Field fieldAnnotion = field.getAnnotation(Field.class);
-                if (fieldAnnotion.field().equals("")) {
-                    throw new DaoException("类：" + clazz.getName() + "的属性[" + field.getName() + "]未指定正确的字段名!");
-                }
-                boolean hasIdAnnotion = field.isAnnotationPresent(Id.class);
-                if (hasIdAnnotion) {
-                    sqls += "\t" + fieldAnnotion.field() + " INT(11) NOT NULL AUTO_INCREMENT";
-                } else {
-                    sqls += "\t" + fieldAnnotion.field() + " " + fieldAnnotion.type().toString();
-                    int length = fieldAnnotion.length();
-                    int decimalLength = fieldAnnotion.decimalLength();
-                    String type = fieldAnnotion.type().toString();
-                    if (type.equals("INT")) {
-                        sqls += "(" + ((length == 255) ? 11 : length) + ")";
-                    } else if (type.equals("VARCHAR")) {
-                        sqls += "(" + length + ")";
-                    } else if (type.equals("DECIMAL")) {
-                        sqls += "(" + ((length == 255) ? 12 : length) + ", " + decimalLength + ")";
-                    }
-                    sqls += ((fieldAnnotion.nullable() && !type.equals("TIMESTAMP")) ? " " : " NOT NULL") +
-                            (!fieldAnnotion.nullable() && type.contains("INT") ? (" default " + fieldAnnotion.defaultValue()) : " ");
-                }
-                if (idField.equals("")) {
-                    idField = (hasIdAnnotion) ? fieldAnnotion.field() : "";
-                }
-                try {
-                    String assertField = "DESCRIBE " + (clazz.getAnnotation(Entity.class)).tableName() + " " + fieldAnnotion.field();
-                    PreparedStatement ps = this.connect.prepareStatement(assertField, 1004, 1007);
-                    ResultSet resultSet = ps.executeQuery();
-                    resultSet.last();
-                    if (resultSet.getRow() == 0) {
-                        String type = fieldAnnotion.type().toString();
-                        int length = fieldAnnotion.length();
-                        int decimalLength = fieldAnnotion.decimalLength();
-                        String typeSql;
-                        if (type.equalsIgnoreCase("INT")) {
-                            typeSql = "INT(" + ((length == 255) ? 11 : length) + ") ";
-                        } else if (type.equalsIgnoreCase("VARCHAR")) {
-                            typeSql = "VARCHAR(" + length + ") ";
-                        } else if (type.equalsIgnoreCase("DECIMAL")) {
-                            typeSql = "DECIMAL(" + ((length == 255) ? 12 : length) + ", " + decimalLength + ") ";
-                        } else {
-                            typeSql = fieldAnnotion.type().toString() + " ";
-                        }
-                        String alterSql = "ALTER TABLE " +
-                                (clazz.getAnnotation(Entity.class)).tableName() +
-                                " ADD COLUMN " + fieldAnnotion.field() +
-                                " " + typeSql +
-                                (fieldAnnotion.nullable() && !type.equals("TIMESTAMP") ? " " : "NOT NULL ") +
-                                (!fieldAnnotion.nullable() && type.contains("INT") ? (" default " + fieldAnnotion.defaultValue()) : " ");
-                        this.alterUpdates.add(alterSql);
-                    }
-                } catch (MySQLSyntaxErrorException e) {
-                    String message = e.getMessage();
-                    if (message == null || !Pattern.matches("Table '.*' doesn't exist", message))
-                        log.error(e.getLocalizedMessage());
-                } catch (Exception e2) {
-                    log.error("更新字段出错了", e2);
-                }
-                sqls += ",\n";
-            }
-            if (!(idField.equals(""))) {
-                sqls += "\tPRIMARY KEY (" + idField + ")";
-            }
-            sqls += "\n);\n";
-            this.sql.add(sqls);
+            // 删除原有表
+            this.sqlList.add("DROP TABLE IF EXISTS " + tableName + ";");
+            // 创建新表
+            createTable(tableName, clazz);
         }
     }
 
-    private void create(List<Class<?>> clazzs) {
-        for (Class<?> clazz : clazzs) {
-            java.lang.reflect.Field[] arrayOfField;
-            String sqls = "";
-            String idField = "";
-            if (!(clazz.isAnnotationPresent(Entity.class))) {
+    /**
+     * 新建表
+     * @param tableName 表名
+     * @param clazz 表实体
+     */
+    private void createTable(String tableName, Class<?> clazz) {
+        String idField = null;
+        String sql = "CREATE TABLE IF NOT EXISTS " + tableName + "(\n";
+        // 遍历字段
+        for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
+            // 非注解字段 > 跳过
+            if (!field.isAnnotationPresent(Field.class)) {
                 continue;
             }
-            // 获取注解实体
-            Entity entity = clazz.getAnnotation(Entity.class);
-            // 表名
-            String tableName = entity.tableName();
-            // 是否需要检测表结构
-            boolean check = entity.check();
-            if (!check) {
+            // 验证字段名
+            Field fieldAnnotation = field.getAnnotation(Field.class);
+            if (StringUtils.isBlank(fieldAnnotation.field())) {
+                throw new RuntimeException(clazz.getName() + " > " + field.getName() + " 未指定或指定了错误的字段名 : " + fieldAnnotation.field());
+            }
+            // 如果是id字段 > 标记 & not null
+            if (field.isAnnotationPresent(Id.class)) {
+                if (idField == null)
+                    idField = fieldAnnotation.field();
+                sql += "\t" + fieldAnnotation.field() + " INT(11) NOT NULL AUTO_INCREMENT";
+            }
+            // 普通字段
+            else {
+                sql += "\t" + fieldAnnotation.field() + " " + fieldAnnotation.type().toString();
+                int length = fieldAnnotation.length();
+                int decimalLength = fieldAnnotation.decimalLength();
+                String type = fieldAnnotation.type().toString();
+                if (type.equals("INT")) {
+                    sql += "(" + ((length == 255) ? 11 : length) + ")";
+                } else if (type.equals("VARCHAR")) {
+                    sql += "(" + length + ")";
+                } else if (type.equals("DECIMAL")) {
+                    sql += "(" + ((length == 255) ? 12 : length) + ", " + decimalLength + ")";
+                }
+                sql += ((fieldAnnotation.nullable() && !type.equals("TIMESTAMP")) ? " " : " NOT NULL") +
+                        (!fieldAnnotation.nullable() && type.contains("INT") ? (" default " + fieldAnnotation.defaultValue()) : " ");
+            }
+            sql += ",\n";
+        }
+        if (idField != null) {
+            sql += "\tPRIMARY KEY (" + idField + ")";
+        }
+        sql += "\n);\n";
+        this.sqlList.add(sql);
+    }
+
+    /**
+     * 更新表结构
+     * @param clazzList 表实体列表
+     */
+    private void update(List<Class<?>> clazzList) throws Exception {
+        for (Class<?> clazz : clazzList) {
+            Entity entity; // 表实体
+            String tableName;
+            // 是否表实体
+            if (!clazz.isAnnotationPresent(Entity.class)) {
                 continue;
             }
-            if (tableName.equals("")) {
-                throw new DaoException("类：[" + clazz.getName() + "]未指定正确的表名!");
+            // 是否需要检测表结构, 如果不需, 则跳过该表实体
+            if (!(entity = clazz.getAnnotation(Entity.class)).check()) {
+                continue;
             }
-            this.sql.add("DROP TABLE IF EXISTS " + tableName + ";");
-            sqls += "CREATE TABLE " + (clazz.getAnnotation(Entity.class)).tableName() + "(\n";
-            java.lang.reflect.Field[] fields = clazz.getDeclaredFields();
-            int j = (arrayOfField = fields).length;
-            for (int i = 0; i < j; ++i) {
-                java.lang.reflect.Field field = arrayOfField[i];
-                if (!(field.isAnnotationPresent(Field.class))) {
-                    continue;
-                }
-                Field fieldAnnotion = field.getAnnotation(Field.class);
-                if (fieldAnnotion.field().equals("")) {
-                    throw new DaoException("类：" + clazz.getName() + "的属性[" + field.getName() + "]未指定正确的字段名!");
-                }
-                boolean hasIdAnnotion = field.isAnnotationPresent(Id.class);
-                if (hasIdAnnotion) {
-                    sqls += "\t" + fieldAnnotion.field() + " INT(11) NOT NULL AUTO_INCREMENT";
+            // 验证表名
+            if (StringUtils.isBlank((tableName = entity.tableName()))) {
+                throw new RuntimeException(clazz.getName() + " 未指定或指定了错误的表名 : " + tableName);
+            }
+            // 如果表不存在, 则新建表
+            if (!checkTableExist(tableName)) {
+                createTable(tableName, clazz);
+            }
+            // 如果表已存在, 则检查并更新字段
+            else {
+                checkForAddColumn(clazz);
+            }
+        }
+    }
+
+    /**
+     * 检测表中是否含有该字段, 如不包含, 则新增该字段
+     * @param clazz 表实体
+     */
+    private void checkForAddColumn(Class<?> clazz) throws Exception {
+        // 遍历字段
+        for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
+            PreparedStatement ps;
+            ResultSet resultSet;
+            // 非注解字段 > 跳过
+            if (!field.isAnnotationPresent(Field.class)) {
+                continue;
+            }
+            // 验证字段名
+            Field fieldAnnotation = field.getAnnotation(Field.class);
+            if (StringUtils.isBlank(fieldAnnotation.field())) {
+                throw new RuntimeException(clazz.getName() + " > " + field.getName() + " 未指定或指定了错误的字段名 : " + fieldAnnotation.field());
+            }
+            // 检查字段是否存在
+            String assertField = "DESCRIBE " + (clazz.getAnnotation(Entity.class)).tableName() + " " + fieldAnnotation.field();
+            ps = this.connect.prepareStatement(assertField, 1004, 1007);
+            resultSet = ps.executeQuery();
+            // 不存在则新增字段
+            if (!resultSet.last()) {
+                String type = fieldAnnotation.type().toString();
+                int length = fieldAnnotation.length();
+                int decimalLength = fieldAnnotation.decimalLength();
+                String typeSql;
+                if (type.equalsIgnoreCase("INT")) {
+                    typeSql = "INT(" + ((length == 255) ? 11 : length) + ") ";
+                } else if (type.equalsIgnoreCase("VARCHAR")) {
+                    typeSql = "VARCHAR(" + length + ") ";
+                } else if (type.equalsIgnoreCase("DECIMAL")) {
+                    typeSql = "DECIMAL(" + ((length == 255) ? 12 : length) + ", " + decimalLength + ") ";
                 } else {
-                    sqls += "\t" + fieldAnnotion.field() + " " + fieldAnnotion.type().toString();
-                    if (fieldAnnotion.type().toString().endsWith("INT")) {
-                        sqls += "(" + ((fieldAnnotion.length() == 255) ? 11 : fieldAnnotion.length()) + ")";
-                    } else if (fieldAnnotion.type().toString().equals("VARCHAR")) {
-                        sqls += "(" + fieldAnnotion.length() + ")";
-                    }
-                    sqls += (fieldAnnotion.nullable() && !fieldAnnotion.type().toString().equals("TIMESTAMP")) ? " " : " NOT NULL";
+                    typeSql = fieldAnnotation.type().toString() + " ";
                 }
-                if (idField.equals("")) {
-                    idField = (hasIdAnnotion) ? fieldAnnotion.field() : "";
-                }
-                sqls += ",\n";
+                String alterSql = "ALTER TABLE " + (clazz.getAnnotation(Entity.class)).tableName() +
+                        " ADD COLUMN " + fieldAnnotation.field() + " " + typeSql +
+                        (fieldAnnotation.nullable() && !type.equals("TIMESTAMP") ? " " : "NOT NULL ") +
+                        (!fieldAnnotation.nullable() && type.contains("INT") ? (" default " + fieldAnnotation.defaultValue()) : " ");
+                this.alterUpdates.add(alterSql);
             }
-            if (!(idField.equals(""))) {
-                sqls += "\tPRIMARY KEY (" + idField + ")";
-            }
-            sqls += "\n);\n";
-            this.sql.add(sqls);
+            ps.close();
+            resultSet.close();
+        }
+    }
+
+    /**
+     * 检查表是否存在
+     * @param name 表名
+     * @return 是否存在
+     */
+    private boolean checkTableExist(String name) {
+        PreparedStatement ps;
+        ResultSet resultSet;
+        try {
+            String sql = "desc " + name;
+            ps = this.connect.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            resultSet = ps.executeQuery();
+            boolean hasRow = resultSet.last();
+            ps.close();
+            resultSet.close();
+            return hasRow;
+        } catch (MySQLSyntaxErrorException e1) {
+            String message = e1.getMessage();
+            if (message != null && Pattern.matches("Table '.*' doesn't exist", message))
+                return false;
+            else
+                throw new RuntimeException(e1);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
