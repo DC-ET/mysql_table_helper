@@ -19,7 +19,10 @@
 ![image](https://raw.githubusercontent.com/15058126273/mysql_table_helper/master/resources/images/properties1.png)
 
 二、在项目启动时想尽办法执行以下代码
+
 <b>new com.yjy.mysql.dialect.MYSQL5Dialect(CONFIG_PATH + "db.properties").init();</b>
+
+其中 CONFIG_PATH 是你的 db.properties 目录
 
 ### 举个栗子:
 
