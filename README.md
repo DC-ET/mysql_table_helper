@@ -13,6 +13,8 @@
 
 ## 使用方法
 
+* [simple example](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/yjy/mysql/example/main/SimpleTest.java)
+
 首先要将此Artifact导出为jar, 当然为了让jar包尽可能小, 不要将依赖的jar(如: log4j)一起导出, 防止真实项目中依赖了相同jar而重复依赖.
 
 一、你需要有一个配置文件 db.properties, 内容如下图: 
