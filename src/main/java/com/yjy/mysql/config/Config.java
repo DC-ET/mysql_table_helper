@@ -1,6 +1,8 @@
 package com.yjy.mysql.config;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -14,7 +16,7 @@ import java.util.Set;
  */
 public class Config {
 
-    private static final Logger log = Logger.getLogger(Config.class);
+    private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     // 数据库配置信息
     public static String DB_DRIVER_NAME = "com.mysql.jdbc.Driver"; // 驱动
@@ -63,8 +65,8 @@ public class Config {
                 if ((package1 = package1.trim()).length() > 0)
                     set.add(package1);
             }
-            DB_PACKAGES = set.toArray(new String[]{});
-        } else
+            DB_PACKAGES = set.toArray(new String[0]);
+        } else if (StringUtils.isNotBlank(packages))
             DB_PACKAGES = new String[]{packages.trim()};
     }
 
