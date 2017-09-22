@@ -8,6 +8,8 @@ import com.yjy.mysql.comment.Id;
 import com.yjy.mysql.config.Config;
 import com.yjy.mysql.driverManager.DriverManagerDataSource;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -18,6 +20,8 @@ import java.util.regex.Pattern;
 import static com.yjy.mysql.config.Config.*;
 
 public class MYSQL5Dialect {
+
+    private static final Logger log = LoggerFactory.getLogger(MYSQL5Dialect.class);
 
     private List<String> sqlList = new ArrayList<String>();
     private List<String> alterUpdates = new ArrayList<String>();
@@ -62,7 +66,13 @@ public class MYSQL5Dialect {
             statement.executeBatch();
             this.connect.close();
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            log.error("init throw an error", e);
+        } finally {
+            try {
+                this.connect.close();
+            } catch (Exception e) {
+                log.error("init > close connection failed", e);
+            }
         }
     }
 
