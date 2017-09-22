@@ -110,6 +110,7 @@ public class MYSQL5Dialect {
      */
     private void createTable(String tableName, Class<?> clazz) {
         String idField = null;
+        boolean firstColumn = true;
         String sql = "CREATE TABLE IF NOT EXISTS " + tableName + "(\n";
         // 遍历字段
         for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
@@ -121,6 +122,12 @@ public class MYSQL5Dialect {
             Field fieldAnnotation = field.getAnnotation(Field.class);
             if (StringUtils.isBlank(fieldAnnotation.field())) {
                 throw new RuntimeException(clazz.getName() + " > " + field.getName() + " 未指定或指定了错误的字段名 : " + fieldAnnotation.field());
+            }
+            // 如果是不是第一个字段, 则sql先加','
+            if (firstColumn) {
+                firstColumn = false;
+            } else {
+                sql += ",\n";
             }
             // 如果是id字段 > 标记 & not null
             if (field.isAnnotationPresent(Id.class)) {
@@ -144,12 +151,11 @@ public class MYSQL5Dialect {
                 sql += ((fieldAnnotation.nullable() && !type.equals("TIMESTAMP")) ? " " : " NOT NULL") +
                         (!fieldAnnotation.nullable() && type.contains("INT") ? (" default " + fieldAnnotation.defaultValue()) : " ");
             }
-            sql += ",\n";
         }
         if (idField != null) {
-            sql += "\tPRIMARY KEY (" + idField + ")";
+            sql += ", PRIMARY KEY (" + idField + ")";
         }
-        sql += "\n);\n";
+        sql += ");";
         this.sqlList.add(sql);
     }
 
