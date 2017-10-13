@@ -45,11 +45,13 @@ public class MYSQL5Dialect {
      */
     public void init() {
         try {
+            log.info("MYSQL5Dialect init...");
             this.connect = this.dataSource.getConnection();
             List<Class<?>> clazzList = new ArrayList<Class<?>>();
             for (String package1 : this.packages) {
                 clazzList.addAll(ScanPackage.getClassesByPackageName(package1));
             }
+            log.info("MYSQL5Dialect init > packagesSize: {}, auto : {}, classListSize : {}", packages.length, this.auto, clazzList.size());
             if ("create".equals(this.auto)) {
                 create(clazzList);
             } else if ("update".equals(this.auto)) {
@@ -81,6 +83,7 @@ public class MYSQL5Dialect {
      * @param clazzList 表实体列表
      */
     private void create(List<Class<?>> clazzList) {
+        log.info("MYSQL5Dialect create...");
         for (Class<?> clazz : clazzList) {
             Entity entity; // 表实体
             String tableName;
@@ -109,6 +112,7 @@ public class MYSQL5Dialect {
      * @param clazz 表实体
      */
     private void createTable(String tableName, Class<?> clazz) {
+        log.info("MYSQL5Dialect createTable: {}", tableName);
         String idField = null;
         boolean firstColumn = true;
         String sql = "CREATE TABLE IF NOT EXISTS " + tableName + "(\n";
@@ -164,6 +168,7 @@ public class MYSQL5Dialect {
      * @param clazzList 表实体列表
      */
     private void update(List<Class<?>> clazzList) throws Exception {
+        log.info("MYSQL5Dialect update...");
         for (Class<?> clazz : clazzList) {
             Entity entity; // 表实体
             String tableName;
@@ -195,6 +200,7 @@ public class MYSQL5Dialect {
      * @param clazz 表实体
      */
     private void checkForAddColumn(Class<?> clazz) throws Exception {
+        log.info("MYSQL5Dialect checkForAddColumn ...");
         // 遍历字段
         for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
             PreparedStatement ps;
@@ -244,6 +250,7 @@ public class MYSQL5Dialect {
      * @return 是否存在
      */
     private boolean checkTableExist(String name) {
+        log.info("MYSQL5Dialect checkTableExist...");
         PreparedStatement ps;
         ResultSet resultSet;
         try {
