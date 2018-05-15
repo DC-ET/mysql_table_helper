@@ -5,16 +5,16 @@ import com.yjy.mysql.analysis.ScanPackage;
 import com.yjy.mysql.comment.Entity;
 import com.yjy.mysql.comment.Field;
 import com.yjy.mysql.comment.Id;
-import com.yjy.mysql.config.Config;
 import com.yjy.mysql.driverManager.DriverManagerDataSource;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import static com.yjy.mysql.config.Config.*;
@@ -31,9 +31,7 @@ public class MYSQL5Dialect {
     private DataSource dataSource; // 数据库连接
     private Connection connect;
 
-    public MYSQL5Dialect(String configPath) {
-        // 加载配置参数
-        Config.loadConfig(configPath);
+    {
         this.dataSource = new DriverManagerDataSource(DB_DRIVER_NAME, DB_URL, DB_USERNAME, DB_PASSWORD);
         this.packages = DB_PACKAGES;
         this.auto = "create".equalsIgnoreCase(DB_AUTO) ? DB_AUTO : "update";
@@ -47,15 +45,15 @@ public class MYSQL5Dialect {
         try {
             log.info("MYSQL5Dialect init...");
             this.connect = this.dataSource.getConnection();
-            List<Class<?>> clazzList = new ArrayList<Class<?>>();
+            Set<Class<?>> clazzSet = new HashSet<Class<?>>();
             for (String package1 : this.packages) {
-                clazzList.addAll(ScanPackage.getClassesByPackageName(package1));
+                clazzSet.addAll(ScanPackage.getClassesByPackageName(package1));
             }
-            log.info("MYSQL5Dialect init > packagesSize: {}, auto : {}, classListSize : {}", packages.length, this.auto, clazzList.size());
+            log.info("MYSQL5Dialect init > packagesSize: {}, auto : {}, classListSize : {}", packages.length, this.auto, clazzSet.size());
             if ("create".equals(this.auto)) {
-                create(clazzList);
+                create(clazzSet);
             } else if ("update".equals(this.auto)) {
-                update(clazzList);
+                update(clazzSet);
             }
             this.sqlList.addAll(this.alterUpdates);
             Statement statement = this.connect.createStatement();
@@ -67,6 +65,7 @@ public class MYSQL5Dialect {
             }
             statement.executeBatch();
             this.connect.close();
+            log.info("MYSQL5Dialect init finished...");
         } catch (Exception e) {
             log.error("init throw an error", e);
         } finally {
@@ -80,11 +79,11 @@ public class MYSQL5Dialect {
 
     /**
      * 重新创建表
-     * @param clazzList 表实体列表
+     * @param clazzSet 表实体列表
      */
-    private void create(List<Class<?>> clazzList) {
+    private void create(Set<Class<?>> clazzSet) {
         log.info("MYSQL5Dialect create...");
-        for (Class<?> clazz : clazzList) {
+        for (Class<?> clazz : clazzSet) {
             Entity entity; // 表实体
             String tableName;
             // 是否表实体
@@ -96,7 +95,7 @@ public class MYSQL5Dialect {
                 continue;
             }
             // 验证表名
-            if (StringUtils.isBlank((tableName = entity.tableName()))) {
+            if ("".equals((tableName = entity.tableName()).trim())) {
                 throw new RuntimeException(clazz.getName() + " 未指定或指定了错误的表名 : " + tableName);
             }
             // 删除原有表
@@ -115,7 +114,7 @@ public class MYSQL5Dialect {
         log.info("MYSQL5Dialect createTable: {}", tableName);
         String idField = null;
         boolean firstColumn = true;
-        String sql = "CREATE TABLE IF NOT EXISTS " + tableName + "(\n";
+        StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS " + tableName + "(\n");
         // 遍历字段
         for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
             // 非注解字段 > 跳过
@@ -124,52 +123,52 @@ public class MYSQL5Dialect {
             }
             // 验证字段名
             Field fieldAnnotation = field.getAnnotation(Field.class);
-            if (StringUtils.isBlank(fieldAnnotation.field())) {
+            if ("".equals(fieldAnnotation.field().trim())) {
                 throw new RuntimeException(clazz.getName() + " > " + field.getName() + " 未指定或指定了错误的字段名 : " + fieldAnnotation.field());
             }
             // 如果是不是第一个字段, 则sql先加','
             if (firstColumn) {
                 firstColumn = false;
             } else {
-                sql += ",\n";
+                sql.append(",\n");
             }
             // 如果是id字段 > 标记 & not null
             if (field.isAnnotationPresent(Id.class)) {
                 if (idField == null)
                     idField = fieldAnnotation.field();
-                sql += "\t" + fieldAnnotation.field() + " INT(11) NOT NULL AUTO_INCREMENT";
+                sql.append("\t").append(fieldAnnotation.field()).append(" INT(11) NOT NULL AUTO_INCREMENT");
             }
             // 普通字段
             else {
-                sql += "\t" + fieldAnnotation.field() + " " + fieldAnnotation.type().toString();
+                sql.append("\t").append(fieldAnnotation.field()).append(" ").append(fieldAnnotation.type().toString());
                 int length = fieldAnnotation.length();
                 int decimalLength = fieldAnnotation.decimalLength();
                 String type = fieldAnnotation.type().toString();
                 if (type.equals("INT")) {
-                    sql += "(" + ((length == 255) ? 11 : length) + ")";
+                    sql.append("(").append(((length == 255) ? 11 : length)).append(")");
                 } else if (type.equals("VARCHAR")) {
-                    sql += "(" + length + ")";
+                    sql.append("(").append(length).append(")");
                 } else if (type.equals("DECIMAL")) {
-                    sql += "(" + ((length == 255) ? 12 : length) + ", " + decimalLength + ")";
+                    sql.append("(").append(((length == 255) ? 12 : length)).append(", ").append(decimalLength).append(")");
                 }
-                sql += ((fieldAnnotation.nullable() && !type.equals("TIMESTAMP")) ? " " : " NOT NULL") +
-                        (!fieldAnnotation.nullable() && type.contains("INT") ? (" default " + fieldAnnotation.defaultValue()) : " ");
+                sql.append((fieldAnnotation.nullable() && !type.equals("TIMESTAMP")) ? " " : " NOT NULL")
+                        .append((!fieldAnnotation.nullable() && type.contains("INT") ? (" default " + fieldAnnotation.defaultValue()) : " "));
             }
         }
         if (idField != null) {
-            sql += ", PRIMARY KEY (" + idField + ")";
+            sql.append(", PRIMARY KEY (").append(idField).append(")");
         }
-        sql += ");";
-        this.sqlList.add(sql);
+        sql.append(");");
+        this.sqlList.add(sql.toString());
     }
 
     /**
      * 更新表结构
-     * @param clazzList 表实体列表
+     * @param clazzSet 表实体列表
      */
-    private void update(List<Class<?>> clazzList) throws Exception {
+    private void update(Set<Class<?>> clazzSet) throws Exception {
         log.info("MYSQL5Dialect update...");
-        for (Class<?> clazz : clazzList) {
+        for (Class<?> clazz : clazzSet) {
             Entity entity; // 表实体
             String tableName;
             // 是否表实体
@@ -181,7 +180,7 @@ public class MYSQL5Dialect {
                 continue;
             }
             // 验证表名
-            if (StringUtils.isBlank((tableName = entity.tableName()))) {
+            if ("".equals((tableName = entity.tableName().trim()))) {
                 throw new RuntimeException(clazz.getName() + " 未指定或指定了错误的表名 : " + tableName);
             }
             // 如果表不存在, 则新建表
@@ -211,12 +210,12 @@ public class MYSQL5Dialect {
             }
             // 验证字段名
             Field fieldAnnotation = field.getAnnotation(Field.class);
-            if (StringUtils.isBlank(fieldAnnotation.field())) {
+            if ("".equals(fieldAnnotation.field().trim())) {
                 throw new RuntimeException(clazz.getName() + " > " + field.getName() + " 未指定或指定了错误的字段名 : " + fieldAnnotation.field());
             }
             // 检查字段是否存在
             String assertField = "DESCRIBE " + (clazz.getAnnotation(Entity.class)).tableName() + " " + fieldAnnotation.field();
-            ps = this.connect.prepareStatement(assertField, 1004, 1007);
+            ps = this.connect.prepareStatement(assertField, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             resultSet = ps.executeQuery();
             // 不存在则新增字段
             if (!resultSet.last()) {

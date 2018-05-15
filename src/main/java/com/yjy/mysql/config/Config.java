@@ -1,6 +1,5 @@
 package com.yjy.mysql.config;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,9 +27,21 @@ public class Config {
     public static String DB_AUTO = "update"; // 更新方式
     public static boolean DB_SHOW_SQL = true; // 是否打印sql语句
 
+    /**
+     * 从配置文件加载配置
+     * @param configPath 配置文件地址
+     */
     public static void loadConfig(String configPath) {
         // 表结构更新配置
         Properties tablePros = getProperties(configPath);
+        loadConfig(tablePros);
+    }
+
+    /**
+     * 加载配置
+     * @param tablePros 配置信息
+     */
+    public static void loadConfig(Properties tablePros) {
         String dbDriverName = tablePros.getProperty("db.driver");
         String dbUrl = tablePros.getProperty("db.url");
         String dbUsername = tablePros.getProperty("db.username");
@@ -66,7 +77,7 @@ public class Config {
                     set.add(package1);
             }
             DB_PACKAGES = set.toArray(new String[0]);
-        } else if (StringUtils.isNotBlank(packages))
+        } else if (!"".equals(packages.trim()))
             DB_PACKAGES = new String[]{packages.trim()};
     }
 

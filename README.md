@@ -13,16 +13,19 @@
 
 ## 使用方法
 
-* [simple example](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/yjy/mysql/example/main/SimpleTest.java)
-
 首先要将此Artifact导出为jar, 当然为了让jar包尽可能小, 不要将依赖的jar(如: log4j)一起导出, 防止真实项目中依赖了相同jar而重复依赖.
 
 一、你需要有一个配置文件 db.properties, 内容如下图: 
 ![image](https://raw.githubusercontent.com/15058126273/mysql_table_helper/master/resources/images/properties1.png)
+    
+   如果你项目中已经有类似的数据库配置信息, 那么你也可以直接将其拿来封装成 Properties<br/>
+   需要注意的是, Properties中的key需要以上面配置文件的key为标准
+   
+   
+二、在项目启动时想尽办法执行以下代码(二选一)
 
-二、在项目启动时想尽办法执行以下代码
-
-<b>new com.yjy.mysql.dialect.MYSQL5Dialect(CONFIG_PATH + "db.properties").init();</b>
+<b>1 > com.yjy.mysql.TableInitializer.init(CONFIG_PATH + "db.properties");</b><br/>
+<b>2 > com.yjy.mysql.TableInitializer.init(properties).init();</b>
 
 其中 CONFIG_PATH 是你的 db.properties 目录
 
@@ -34,3 +37,7 @@
 
 三、最后, 给我们的实体类加上注解, 就大功告成了, 例子如下图:
 ![image](https://raw.githubusercontent.com/15058126273/mysql_table_helper/master/resources/images/entity1.png)
+
+### 调用例子
+
+* [simple example](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/yjy/mysql/example/main/SimpleTest.java)

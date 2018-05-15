@@ -15,6 +15,7 @@ public @interface Entity {
 	
 	/**
 	 * 表名
+	 * @return tableName
 	 */
 	String tableName();
 	
@@ -22,6 +23,7 @@ public @interface Entity {
 	 * 默认：true
 	 * 是否检测并更新表结构
 	 * 建议表实体没有变动的情况下 将其设置成false，这样启动的时候就不会再去检测更新这个表了
+	 * @return if check
 	 */
 	boolean check() default true;
 	

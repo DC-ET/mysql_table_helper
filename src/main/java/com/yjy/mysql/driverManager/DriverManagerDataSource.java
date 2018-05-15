@@ -1,7 +1,5 @@
 package com.yjy.mysql.driverManager;
 
-import org.apache.commons.lang3.StringUtils;
-
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -9,7 +7,8 @@ import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
- * edit on @see{org.springframework.jdbc.datasource.DriverManagerDataSource}
+ * edit on org.springframework.jdbc.datasource.DriverManagerDataSource
+ * see {org.springframework.jdbc.datasource.DriverManagerDataSource}
  * Created by yjy on 2017/9/20.
  */
 public class DriverManagerDataSource extends AbstractDataSource {
@@ -41,7 +40,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
     }
 
     public void setDriverClassName(String driverClassName) {
-        if(StringUtils.isBlank(driverClassName)) {
+        if("".equals(driverClassName.trim())) {
             throw new IllegalArgumentException("driverClassName must not be empty");
         } else {
             this.driverClassName = driverClassName.trim();
@@ -63,7 +62,7 @@ public class DriverManagerDataSource extends AbstractDataSource {
     }
 
     public void setUrl(String url) {
-        if(StringUtils.isBlank(url)) {
+        if("".equals(url.trim())) {
             throw new IllegalArgumentException("url must not be empty");
         } else {
             this.url = url.trim();
