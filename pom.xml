@@ -8,7 +8,7 @@
         <version>7</version>
     </parent>
 
-    <groupId>com.2oi7.mysql</groupId>
+    <groupId>com.2oi7</groupId>
     <artifactId>mysql-table-helper</artifactId>
     <version>1.0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
