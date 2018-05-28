@@ -16,13 +16,13 @@ public @interface Field {
 	/**
 	 * @return 字段名
 	 */
-	String field();
+	String field() default "";
 
 	/**
 	 * @return 字段类型
 	 * 默认：varchar
 	 */
-	FieldType type() default FieldType.VARCHAR;
+	FieldType type() default FieldType.AUTO;
 
 	/**
 	 * @return 字段长度
@@ -46,6 +46,6 @@ public @interface Field {
 	 * @return 新加字段不为空 时 旧数据填补默认值
 	 * 仅限int类型字段
 	 */
-	int defaultValue() default 0;
+	int defaultValue() default -1;
 	
 }

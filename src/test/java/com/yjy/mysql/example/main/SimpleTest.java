@@ -25,20 +25,20 @@ public class SimpleTest {
         String dbPropertiesPath = this.getClass().getResource("/config/db.properties").getPath();
         TableInitializer.init(dbPropertiesPath);
 
-        // 2.组合现有的配置调用初始化
-        String otherPropertiesPath = this.getClass().getResource("/config/other-db.properties").getPath();
-        Properties otherProperties = new Properties();
-        otherProperties.load(new FileInputStream(otherPropertiesPath));
-
-        Properties properties = new Properties();
-        properties.setProperty("db.url", otherProperties.getProperty("url"));
-        properties.setProperty("db.username", otherProperties.getProperty("username"));
-        properties.setProperty("db.password", otherProperties.getProperty("password"));
-        properties.setProperty("db.driver", otherProperties.getProperty("driver"));
-        properties.setProperty("db.packages", otherProperties.getProperty("packages"));
-        properties.setProperty("db.auto", otherProperties.getProperty("auto"));
-        properties.setProperty("db.showSql", otherProperties.getProperty("showSql"));
-        TableInitializer.init(properties);
+//        // 2.组合现有的配置调用初始化
+//        String otherPropertiesPath = this.getClass().getResource("/config/other-db.properties").getPath();
+//        Properties otherProperties = new Properties();
+//        otherProperties.load(new FileInputStream(otherPropertiesPath));
+//
+//        Properties properties = new Properties();
+//        properties.setProperty("db.url", otherProperties.getProperty("url"));
+//        properties.setProperty("db.username", otherProperties.getProperty("username"));
+//        properties.setProperty("db.password", otherProperties.getProperty("password"));
+//        properties.setProperty("db.driver", otherProperties.getProperty("driver"));
+//        properties.setProperty("db.packages", otherProperties.getProperty("packages"));
+//        properties.setProperty("db.auto", otherProperties.getProperty("auto"));
+//        properties.setProperty("db.showSql", otherProperties.getProperty("showSql"));
+//        TableInitializer.init(properties);
     }
 
 }

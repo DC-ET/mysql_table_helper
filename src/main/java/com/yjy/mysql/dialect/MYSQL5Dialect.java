@@ -4,6 +4,7 @@ import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import com.yjy.mysql.analysis.ScanPackage;
 import com.yjy.mysql.comment.Entity;
 import com.yjy.mysql.comment.Field;
+import com.yjy.mysql.comment.FieldType;
 import com.yjy.mysql.comment.Id;
 import com.yjy.mysql.driverManager.DriverManagerDataSource;
 import org.slf4j.Logger;
@@ -123,9 +124,6 @@ public class MYSQL5Dialect {
             }
             // 验证字段名
             Field fieldAnnotation = field.getAnnotation(Field.class);
-            if ("".equals(fieldAnnotation.field().trim())) {
-                throw new RuntimeException(clazz.getName() + " > " + field.getName() + " 未指定或指定了错误的字段名 : " + fieldAnnotation.field());
-            }
             // 如果是不是第一个字段, 则sql先加','
             if (firstColumn) {
                 firstColumn = false;
@@ -135,24 +133,21 @@ public class MYSQL5Dialect {
             // 如果是id字段 > 标记 & not null
             if (field.isAnnotationPresent(Id.class)) {
                 if (idField == null)
-                    idField = fieldAnnotation.field();
-                sql.append("\t").append(fieldAnnotation.field()).append(" INT(11) NOT NULL AUTO_INCREMENT");
+                    idField = getColumn(field);
+                String type = getType(field);
+                sql.append("\t")
+                        .append(getColumn(field))
+                        .append(" ")
+                        .append(type)
+                        .append("(")
+                        .append(fieldAnnotation.length())
+                        .append((isDecimal(type) ? "," + fieldAnnotation.decimalLength() : ""))
+                        .append(")")
+                        .append(" NOT NULL AUTO_INCREMENT");
             }
             // 普通字段
             else {
-                sql.append("\t").append(fieldAnnotation.field()).append(" ").append(fieldAnnotation.type().toString());
-                int length = fieldAnnotation.length();
-                int decimalLength = fieldAnnotation.decimalLength();
-                String type = fieldAnnotation.type().toString();
-                if (type.equals("INT")) {
-                    sql.append("(").append(((length == 255) ? 11 : length)).append(")");
-                } else if (type.equals("VARCHAR")) {
-                    sql.append("(").append(length).append(")");
-                } else if (type.equals("DECIMAL")) {
-                    sql.append("(").append(((length == 255) ? 12 : length)).append(", ").append(decimalLength).append(")");
-                }
-                sql.append((fieldAnnotation.nullable() && !type.equals("TIMESTAMP")) ? " " : " NOT NULL")
-                        .append((!fieldAnnotation.nullable() && type.contains("INT") ? (" default " + fieldAnnotation.defaultValue()) : " "));
+                sql.append("\t").append(getColumnSql(field));
             }
         }
         if (idField != null) {
@@ -210,32 +205,14 @@ public class MYSQL5Dialect {
             }
             // 验证字段名
             Field fieldAnnotation = field.getAnnotation(Field.class);
-            if ("".equals(fieldAnnotation.field().trim())) {
-                throw new RuntimeException(clazz.getName() + " > " + field.getName() + " 未指定或指定了错误的字段名 : " + fieldAnnotation.field());
-            }
             // 检查字段是否存在
             String assertField = "DESCRIBE " + (clazz.getAnnotation(Entity.class)).tableName() + " " + fieldAnnotation.field();
             ps = this.connect.prepareStatement(assertField, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             resultSet = ps.executeQuery();
             // 不存在则新增字段
             if (!resultSet.last()) {
-                String type = fieldAnnotation.type().toString();
-                int length = fieldAnnotation.length();
-                int decimalLength = fieldAnnotation.decimalLength();
-                String typeSql;
-                if (type.equalsIgnoreCase("INT")) {
-                    typeSql = "INT(" + ((length == 255) ? 11 : length) + ") ";
-                } else if (type.equalsIgnoreCase("VARCHAR")) {
-                    typeSql = "VARCHAR(" + length + ") ";
-                } else if (type.equalsIgnoreCase("DECIMAL")) {
-                    typeSql = "DECIMAL(" + ((length == 255) ? 12 : length) + ", " + decimalLength + ") ";
-                } else {
-                    typeSql = fieldAnnotation.type().toString() + " ";
-                }
                 String alterSql = "ALTER TABLE " + (clazz.getAnnotation(Entity.class)).tableName() +
-                        " ADD COLUMN " + fieldAnnotation.field() + " " + typeSql +
-                        (fieldAnnotation.nullable() && !type.equals("TIMESTAMP") ? " " : "NOT NULL ") +
-                        (!fieldAnnotation.nullable() && type.contains("INT") ? (" default " + fieldAnnotation.defaultValue()) : " ");
+                        " ADD COLUMN " + getColumnSql(field);
                 this.alterUpdates.add(alterSql);
             }
             ps.close();
@@ -269,6 +246,100 @@ public class MYSQL5Dialect {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    /**
+     * 获取字段相对应的sql语句
+     * @param field 属性
+     * @return 字段sql
+     */
+    private String getColumnSql(java.lang.reflect.Field field) {
+        Field fieldAnnotation = field.getAnnotation(Field.class);
+        String type = getType(field);
+        return " " + getColumn(field) +
+                " " + type + "(" +
+                fieldAnnotation.length() + (isDecimal(type) ? "," + fieldAnnotation.decimalLength() : " ") +
+                ") " +
+                (fieldAnnotation.nullable() ? " " : " NOT NULL ") +
+                (!fieldAnnotation.nullable() ? " default " + fieldAnnotation.defaultValue() : "");
+    }
+
+    /**
+     * 获取字段名
+     * @param field 属性名
+     * @return 字段名
+     */
+    private static String getColumn(java.lang.reflect.Field field) {
+        Field fieldAnnotation = field.getAnnotation(Field.class);
+        // 字段名
+        String column = fieldAnnotation.field();
+        if ("".equals(column))
+            column = getColumnByField(field.getName());
+        return column;
+    }
+
+    /**
+     * 根据属性名获取字段名
+     * @param fieldName 属性名
+     * @return 字段名
+     */
+    private static String getColumnByField(String fieldName) {
+        StringBuilder column = new StringBuilder();
+        for (int i = 0; i < fieldName.length(); i++) {
+            char c = fieldName.charAt(i);
+            if (c >= 'A' && c <= 'Z') {
+                c += 32;
+                column.append('_');
+            }
+            column.append(c);
+        }
+        return column.toString();
+    }
+
+    /**
+     * 获取字段指定的类型
+     * @param field 字段
+     * @return 类型
+     */
+    private static String getType(java.lang.reflect.Field field) {
+        Field fieldAnnotation = field.getAnnotation(Field.class);
+        FieldType type = fieldAnnotation.type();
+        if (FieldType.AUTO.equals(type)) {
+            Class clazz = field.getType();
+            // int
+            if (clazz == Integer.class || clazz == int.class)
+                type = FieldType.INT;
+            // long
+            else if (clazz == Long.class || clazz == long.class)
+                type = FieldType.BIGINT;
+            // double
+            else if (clazz == Double.class || clazz == double.class)
+                type = FieldType.DOUBLE;
+            // float
+            else if (clazz == Float.class || clazz == float.class)
+                type = FieldType.FLOAT;
+            // datetime
+            else if (clazz == Date.class)
+                type = FieldType.DATETIME;
+            // 其他
+            else
+                type = FieldType.VARCHAR;
+        }
+        return type.toString();
+    }
+
+    /**
+     * 判断类型是否是小数
+     * @param type 类型
+     * @return 是否小数
+     */
+    private boolean isDecimal(String type) {
+        return "float".equalsIgnoreCase(type)
+                ||
+                "double".equalsIgnoreCase(type)
+                ||
+                "decimal".equalsIgnoreCase(type);
+
     }
 
 }
