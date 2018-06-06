@@ -134,15 +134,10 @@ public class MYSQL5Dialect {
             if (field.isAnnotationPresent(Id.class)) {
                 if (idField == null)
                     idField = getColumn(field);
-                String type = getType(field);
                 sql.append("\t")
                         .append(getColumn(field))
                         .append(" ")
-                        .append(type)
-                        .append("(")
-                        .append(fieldAnnotation.length())
-                        .append((isDecimal(type) ? "," + fieldAnnotation.decimalLength() : ""))
-                        .append(")")
+                        .append(getTypeLength(getType(field), fieldAnnotation.length(), fieldAnnotation.decimalLength()))
                         .append(" NOT NULL AUTO_INCREMENT");
             }
             // 普通字段
@@ -203,10 +198,8 @@ public class MYSQL5Dialect {
             if (!field.isAnnotationPresent(Field.class)) {
                 continue;
             }
-            // 验证字段名
-            Field fieldAnnotation = field.getAnnotation(Field.class);
             // 检查字段是否存在
-            String assertField = "DESCRIBE " + (clazz.getAnnotation(Entity.class)).tableName() + " " + fieldAnnotation.field();
+            String assertField = "DESCRIBE " + (clazz.getAnnotation(Entity.class)).tableName() + " " + getColumn(field);
             ps = this.connect.prepareStatement(assertField, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             resultSet = ps.executeQuery();
             // 不存在则新增字段
@@ -239,9 +232,10 @@ public class MYSQL5Dialect {
             return hasRow;
         } catch (MySQLSyntaxErrorException e1) {
             String message = e1.getMessage();
-            if (message != null && Pattern.matches("Table '.*' doesn't exist", message))
+            if (message != null &&
+                (message.contains("1146") || Pattern.matches("Table '.*' doesn't exist", message))) {
                 return false;
-            else
+            } else
                 throw new RuntimeException(e1);
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -255,12 +249,9 @@ public class MYSQL5Dialect {
      */
     private String getColumnSql(java.lang.reflect.Field field) {
         Field fieldAnnotation = field.getAnnotation(Field.class);
-        String type = getType(field);
-        return " " + getColumn(field) +
-                " " + type + "(" +
-                fieldAnnotation.length() + (isDecimal(type) ? "," + fieldAnnotation.decimalLength() : " ") +
-                ") " +
-                (fieldAnnotation.nullable() ? " " : " NOT NULL ") +
+        return " " + getColumn(field) + " "
+                + getTypeLength(getType(field), fieldAnnotation.length(), fieldAnnotation.decimalLength()) + " "
+                + (fieldAnnotation.nullable() ? " " : " NOT NULL ") +
                 (!fieldAnnotation.nullable() ? " default " + fieldAnnotation.defaultValue() : "");
     }
 
@@ -301,7 +292,7 @@ public class MYSQL5Dialect {
      * @param field 字段
      * @return 类型
      */
-    private static String getType(java.lang.reflect.Field field) {
+    private static FieldType getType(java.lang.reflect.Field field) {
         Field fieldAnnotation = field.getAnnotation(Field.class);
         FieldType type = fieldAnnotation.type();
         if (FieldType.AUTO.equals(type)) {
@@ -325,21 +316,73 @@ public class MYSQL5Dialect {
             else
                 type = FieldType.VARCHAR;
         }
-        return type.toString();
+        return type;
     }
 
     /**
-     * 判断类型是否是小数
+     * 获取字段属性描述
      * @param type 类型
-     * @return 是否小数
+     * @param length 长度
+     * @param decimalLength 小数位
+     * @return 描述
      */
-    private boolean isDecimal(String type) {
-        return "float".equalsIgnoreCase(type)
-                ||
-                "double".equalsIgnoreCase(type)
-                ||
-                "decimal".equalsIgnoreCase(type);
-
+    private String getTypeLength(FieldType type, int length, int decimalLength) {
+        String typeLength;
+        switch (type) {
+            case BIGINT: {
+                typeLength = " BIGINT(" + Math.min(21, length) + ") ";
+                break;
+            }
+            case INT: {
+                typeLength = " INT(" + Math.min(10, length) + ") ";
+                break;
+            }
+            case TINYINT: {
+                typeLength = " TINYINT(1) ";
+                break;
+            }
+            case SMALLINT: {
+                typeLength = " SMALLINT(" + Math.min(10, length) + ") ";
+                break;
+            }
+            case FLOAT: {
+                typeLength = " FLOAT(" + Math.min(10, length) + ", " + decimalLength + ") ";
+                break;
+            }
+            case DOUBLE: {
+                typeLength = " DOUBLE(" + Math.min(10, length) + ", " + decimalLength + ") ";
+                break;
+            }
+            case DECIMAL: {
+                typeLength = " DECIMAL(" + Math.min(10, length) + ", " + decimalLength + ") ";
+                break;
+            }
+            case TEXT: {
+                typeLength = " TEXT(" + length + ") ";
+                break;
+            }
+            case DATE: {
+                typeLength = " DATE ";
+                break;
+            }
+            case DATETIME: {
+                typeLength = " DATETIME ";
+                break;
+            }
+            case TIME: {
+                typeLength = " TIME ";
+                break;
+            }
+            case TIMESTAMP: {
+                typeLength = " TIMESTAMP ";
+                break;
+            }
+            default: {
+                typeLength = " VARCHAR(" + length + ") ";
+                break;
+            }
+        }
+        return typeLength;
     }
 
 }
