@@ -1,10 +1,10 @@
 package com.yjy.mysql;
 
 import com.yjy.mysql.config.Config;
+import com.yjy.mysql.config.DataConfig;
 import com.yjy.mysql.dialect.MYSQL5Dialect;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import javax.naming.ConfigurationException;
 import java.util.Properties;
 
 /**
@@ -15,17 +15,24 @@ import java.util.Properties;
  */
 public class TableInitializer {
 
-    private static final Logger log = LoggerFactory.getLogger(TableInitializer.class);
-
-    public static void init(String configPath) {
+    // way1
+    public static void init(String configPath) throws ConfigurationException {
         // 加载配置参数
         Config.loadConfig(configPath);
         new MYSQL5Dialect().init();
     }
 
-    public static void init(Properties properties) {
+    // way2
+    public static void init(Properties properties) throws ConfigurationException {
         // 加载配置参数
         Config.loadConfig(properties);
+        new MYSQL5Dialect().init();
+    }
+
+    // way3
+    public static void init(DataConfig config) {
+        // 加载配置参数
+        Config.loadConfig(config);
         new MYSQL5Dialect().init();
     }
 

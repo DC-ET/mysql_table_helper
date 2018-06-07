@@ -15,17 +15,18 @@
 
 首先要将此Artifact导出为jar, 当然为了让jar包尽可能小, 不要将依赖的jar(如: log4j)一起导出, 防止真实项目中依赖了相同jar而重复依赖.
 
-一、你需要有一个配置文件 db.properties, 内容如下图: 
+一、你需要有一个配置文件 db.properties ( 后面介绍了一种方式可以不需要配置文件 ), 内容如下图: 
 ![image](https://raw.githubusercontent.com/15058126273/mysql_table_helper/master/resources/images/properties1.png)
     
    如果你项目中已经有类似的数据库配置信息, 那么你也可以直接将其拿来封装成 Properties<br/>
    需要注意的是, Properties中的key需要以上面配置文件的key为标准
    
    
-二、在项目启动时想尽办法执行以下代码(二选一)
+二、在项目启动时想尽办法执行以下代码(三选一)
 
 <b>1 > com.yjy.mysql.TableInitializer.init(CONFIG_PATH + "db.properties");</b><br/>
 <b>2 > com.yjy.mysql.TableInitializer.init(properties).init();</b>
+<b>3 > com.yjy.mysql.TableInitializer.init(config).init();</b>
 
 其中 CONFIG_PATH 是你的 db.properties 目录
 

@@ -3,6 +3,7 @@ package com.yjy.mysql.config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.naming.ConfigurationException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.HashSet;
@@ -18,20 +19,22 @@ public class Config {
     private static final Logger log = LoggerFactory.getLogger(Config.class);
 
     // 数据库配置信息
-    public static String DB_DRIVER_NAME = "com.mysql.jdbc.Driver"; // 驱动
-    public static String DB_URL; // 数据库地址
-    public static String DB_USERNAME; // 用户
-    public static String DB_PASSWORD; // 密码
+    public static DataConfig config;
 
-    public static String[] DB_PACKAGES; // 扫描包
-    public static String DB_AUTO = "update"; // 更新方式
-    public static boolean DB_SHOW_SQL = true; // 是否打印sql语句
+    /**
+     * 加载自定义配置
+     * @param config 配置
+     */
+    public static void loadConfig(DataConfig config) {
+        Config.config = config;
+        log.info("Config loaded. {}", config);
+    }
 
     /**
      * 从配置文件加载配置
      * @param configPath 配置文件地址
      */
-    public static void loadConfig(String configPath) {
+    public static void loadConfig(String configPath) throws ConfigurationException {
         // 表结构更新配置
         Properties tablePros = getProperties(configPath);
         loadConfig(tablePros);
@@ -41,44 +44,38 @@ public class Config {
      * 加载配置
      * @param tablePros 配置信息
      */
-    public static void loadConfig(Properties tablePros) {
+    public static void loadConfig(Properties tablePros) throws ConfigurationException {
         String dbDriverName = tablePros.getProperty("db.driver");
         String dbUrl = tablePros.getProperty("db.url");
         String dbUsername = tablePros.getProperty("db.username");
         String dbPassword = tablePros.getProperty("db.password");
         String packages = tablePros.getProperty("db.packages");
-        String auto = tablePros.getProperty("db.auto");
+        String type = tablePros.getProperty("db.auto");
         String showSql = tablePros.getProperty("db.showSql");
-        if (dbDriverName != null)
-            DB_DRIVER_NAME = dbDriverName.trim();
-        if (dbUrl != null)
-            DB_URL = dbUrl.trim();
-        if (dbUsername != null)
-            DB_USERNAME = dbUsername.trim();
-        if (dbPassword != null)
-            DB_PASSWORD = dbPassword.trim();
-        if (packages != null)
-            dealPackages(packages);
-        if (auto != null)
-            DB_AUTO = auto.trim();
-        if (showSql != null)
-            DB_SHOW_SQL = Boolean.parseBoolean(showSql.trim());
+        DataConfig config = new DataConfig(dealPackages(packages), dbUrl.trim(), dbUsername.trim(), dbPassword.trim(),
+                type.trim(), Boolean.parseBoolean(showSql.trim()), dbDriverName.trim());
+        loadConfig(config);
     }
 
     /**
      * 加载扫描包配置
      * @param packages 配置的扫描包
      */
-    private static void dealPackages(String packages) {
+    private static String[] dealPackages(String packages) throws ConfigurationException{
+        String[] packs;
         if (packages.contains(",")) {
             Set<String> set = new HashSet<String>();
             for (String package1 : packages.split(",")) {
                 if ((package1 = package1.trim()).length() > 0)
                     set.add(package1);
             }
-            DB_PACKAGES = set.toArray(new String[0]);
-        } else if (!"".equals(packages.trim()))
-            DB_PACKAGES = new String[]{packages.trim()};
+            packs = set.toArray(new String[0]);
+        } else if (!"".equals(packages.trim())) {
+            packs = new String[]{packages.trim()};
+        } else {
+            throw new ConfigurationException("can not resolve config packages" + packages);
+        }
+        return packs;
     }
 
     /**

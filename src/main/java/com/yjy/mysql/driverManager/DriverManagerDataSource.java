@@ -1,5 +1,7 @@
 package com.yjy.mysql.driverManager;
 
+import com.yjy.mysql.config.DataConfig;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -22,11 +24,11 @@ public class DriverManagerDataSource extends AbstractDataSource {
     public DriverManagerDataSource() {
     }
 
-    public DriverManagerDataSource(String driverClassName, String url, String username, String password) {
-        this.setDriverClassName(driverClassName);
-        this.setUrl(url);
-        this.setUsername(username);
-        this.setPassword(password);
+    public DriverManagerDataSource(DataConfig config) {
+        this.driverClassName = config.getDriver();
+        this.url = config.getUrl();
+        this.username = config.getUsername();
+        this.password = config.getPassword();
     }
 
     public DriverManagerDataSource(String url, String username, String password) {

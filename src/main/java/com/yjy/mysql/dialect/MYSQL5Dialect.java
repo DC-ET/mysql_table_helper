@@ -6,6 +6,8 @@ import com.yjy.mysql.comment.Entity;
 import com.yjy.mysql.comment.Field;
 import com.yjy.mysql.comment.FieldType;
 import com.yjy.mysql.comment.Id;
+import com.yjy.mysql.config.Config;
+import com.yjy.mysql.config.DataConfig;
 import com.yjy.mysql.driverManager.DriverManagerDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,25 +20,20 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static com.yjy.mysql.config.Config.*;
-
 public class MYSQL5Dialect {
 
     private static final Logger log = LoggerFactory.getLogger(MYSQL5Dialect.class);
 
     private List<String> sqlList = new ArrayList<String>();
     private List<String> alterUpdates = new ArrayList<String>();
-    private String[] packages; // 表实体所在包
-    private String auto; // 更新方式
-    private boolean showSql; // 是否打印执行的sql语句
+
+    private DataConfig config;
     private DataSource dataSource; // 数据库连接
     private Connection connect;
 
     {
-        this.dataSource = new DriverManagerDataSource(DB_DRIVER_NAME, DB_URL, DB_USERNAME, DB_PASSWORD);
-        this.packages = DB_PACKAGES;
-        this.auto = "create".equalsIgnoreCase(DB_AUTO) ? DB_AUTO : "update";
-        this.showSql = DB_SHOW_SQL;
+        this.config = Config.config;
+        this.dataSource = new DriverManagerDataSource(config);
     }
 
     /**
@@ -47,19 +44,20 @@ public class MYSQL5Dialect {
             log.info("MYSQL5Dialect init...");
             this.connect = this.dataSource.getConnection();
             Set<Class<?>> clazzSet = new HashSet<Class<?>>();
-            for (String package1 : this.packages) {
+            for (String package1 : this.config.getPackages()) {
                 clazzSet.addAll(ScanPackage.getClassesByPackageName(package1));
             }
-            log.info("MYSQL5Dialect init > packagesSize: {}, auto : {}, classListSize : {}", packages.length, this.auto, clazzSet.size());
-            if ("create".equals(this.auto)) {
+            log.info("MYSQL5Dialect init > packagesSize: {}, auto : {}, classListSize : {}",
+                    this.config.getPackages().length, this.config.getType(), clazzSet.size());
+            if ("create".equals(this.config.getType())) {
                 create(clazzSet);
-            } else if ("update".equals(this.auto)) {
+            } else if ("update".equals(this.config.getType())) {
                 update(clazzSet);
             }
             this.sqlList.addAll(this.alterUpdates);
             Statement statement = this.connect.createStatement();
             for (String sql : this.sqlList) {
-                if (this.showSql) {
+                if (this.config.isShowSql()) {
                     System.out.println(sql);
                 }
                 statement.addBatch(sql);
