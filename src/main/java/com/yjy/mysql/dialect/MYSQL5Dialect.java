@@ -69,10 +69,12 @@ public class MYSQL5Dialect {
         } catch (Exception e) {
             log.error("init throw an error", e);
         } finally {
-            try {
-                this.connect.close();
-            } catch (Exception e) {
-                log.error("init > close connection failed", e);
+            if (this.connect != null) {
+                try {
+                    this.connect.close();
+                } catch (Exception e) {
+                    log.error("init > close connection failed", e);
+                }
             }
         }
     }

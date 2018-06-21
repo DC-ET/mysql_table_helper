@@ -42,7 +42,7 @@ public class SimpleTest {
 
         // 3.自定义配置 (优势: 无需配置文件, 简单明了)
         String[] packages = new String[]{"com.yjy.mysql.example"};
-        String url = "jdbc:mysql://192.168.1.72:3306/table_helper_test?useUnicode=true&amp;characterEncoding=utf-8";
+        String url = "jdbc:mysql://127.0.0.1:3306/table_helper_test?useUnicode=true&amp;characterEncoding=utf-8";
         String username = "yjy";
         String password = "yyyyyy";
         boolean showSql = true;
