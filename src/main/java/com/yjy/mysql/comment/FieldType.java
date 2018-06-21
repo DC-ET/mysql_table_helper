@@ -10,12 +10,22 @@ public enum FieldType {
 	AUTO, // 自动匹配类型
     BIGINT, // 长整数
     VARCHAR, //字符串
+    /**
+     * @deprecated
+     */
     INT, // 整数
+    INTEGER, // 整数
+    /**
+     * @deprecated
+     */
     TINYINT, // 超小整数
     SMALLINT, // 小整数
     FLOAT, // 单精度浮点数
     DOUBLE, // 双精度浮点数
     DECIMAL, // 小数
+    /**
+     * @deprecated
+     */
     TEXT, // 文本
     DATE, // 日期
     DATETIME, //

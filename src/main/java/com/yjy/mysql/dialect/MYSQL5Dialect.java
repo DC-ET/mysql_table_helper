@@ -9,6 +9,7 @@ import com.yjy.mysql.comment.Id;
 import com.yjy.mysql.config.Config;
 import com.yjy.mysql.config.DataConfig;
 import com.yjy.mysql.driverManager.DriverManagerDataSource;
+import com.yjy.mysql.util.FieldUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -131,13 +132,13 @@ public class MYSQL5Dialect {
             // 如果是id字段 > 标记 & not null
             if (field.isAnnotationPresent(Id.class)) {
                 if (idField == null)
-                    idField = getColumn(field);
+                    idField = FieldUtils.getColumn(field);
                 sql.append("\t")
-                        .append(getColumn(field))
+                        .append(FieldUtils.getColumn(field))
                         .append(" ")
-                        .append(getTypeLength(getType(field), fieldAnnotation.length(), fieldAnnotation.decimalLength()))
+                        .append(getTypeLength(FieldUtils.getType(field), fieldAnnotation.length(), fieldAnnotation.decimalLength()))
                         .append(" NOT NULL ");
-                if (isAutoIncrease(field)) {
+                if (FieldUtils.isAutoIncrease(field)) {
                     sql.append(" AUTO_INCREMENT ");
                 }
             }
@@ -200,7 +201,7 @@ public class MYSQL5Dialect {
                 continue;
             }
             // 检查字段是否存在
-            String assertField = "DESCRIBE " + (clazz.getAnnotation(Entity.class)).tableName() + " " + getColumn(field);
+            String assertField = "DESCRIBE " + (clazz.getAnnotation(Entity.class)).tableName() + " " + FieldUtils.getColumn(field);
             ps = this.connect.prepareStatement(assertField, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             resultSet = ps.executeQuery();
             // 不存在则新增字段
@@ -250,84 +251,10 @@ public class MYSQL5Dialect {
      */
     private String getColumnSql(java.lang.reflect.Field field) {
         Field fieldAnnotation = field.getAnnotation(Field.class);
-        return " " + getColumn(field) + " "
-                + getTypeLength(getType(field), fieldAnnotation.length(), fieldAnnotation.decimalLength()) + " "
+        return " " + FieldUtils.getColumn(field) + " "
+                + getTypeLength(FieldUtils.getType(field), fieldAnnotation.length(), fieldAnnotation.decimalLength()) + " "
                 + (fieldAnnotation.nullable() ? " " : " NOT NULL ") +
                 (!fieldAnnotation.nullable() ? " default " + fieldAnnotation.defaultValue() : "");
-    }
-
-    /**
-     * 获取字段名
-     * @param field 属性名
-     * @return 字段名
-     */
-    private static String getColumn(java.lang.reflect.Field field) {
-        Field fieldAnnotation = field.getAnnotation(Field.class);
-        // 字段名
-        String column = fieldAnnotation.field();
-        if ("".equals(column))
-            column = getColumnByField(field.getName());
-        return column;
-    }
-
-    /**
-     * 是否自增长
-     * @param idField id字段
-     * @return 是否
-     */
-    private static boolean isAutoIncrease(java.lang.reflect.Field idField) {
-        Id fieldAnnotation = idField.getAnnotation(Id.class);
-        return fieldAnnotation.autoIncrease();
-    }
-
-    /**
-     * 根据属性名获取字段名
-     * @param fieldName 属性名
-     * @return 字段名
-     */
-    private static String getColumnByField(String fieldName) {
-        StringBuilder column = new StringBuilder();
-        for (int i = 0; i < fieldName.length(); i++) {
-            char c = fieldName.charAt(i);
-            if (c >= 'A' && c <= 'Z') {
-                c += 32;
-                column.append('_');
-            }
-            column.append(c);
-        }
-        return column.toString();
-    }
-
-    /**
-     * 获取字段指定的类型
-     * @param field 字段
-     * @return 类型
-     */
-    private static FieldType getType(java.lang.reflect.Field field) {
-        Field fieldAnnotation = field.getAnnotation(Field.class);
-        FieldType type = fieldAnnotation.type();
-        if (FieldType.AUTO.equals(type)) {
-            Class clazz = field.getType();
-            // int
-            if (clazz == Integer.class || clazz == int.class)
-                type = FieldType.INT;
-            // long
-            else if (clazz == Long.class || clazz == long.class)
-                type = FieldType.BIGINT;
-            // double
-            else if (clazz == Double.class || clazz == double.class)
-                type = FieldType.DOUBLE;
-            // float
-            else if (clazz == Float.class || clazz == float.class)
-                type = FieldType.FLOAT;
-            // datetime
-            else if (clazz == Date.class)
-                type = FieldType.DATETIME;
-            // 其他
-            else
-                type = FieldType.VARCHAR;
-        }
-        return type;
     }
 
     /**
@@ -344,8 +271,8 @@ public class MYSQL5Dialect {
                 typeLength = " BIGINT(" + Math.min(21, length) + ") ";
                 break;
             }
-            case INT: {
-                typeLength = " INT(" + Math.min(10, length) + ") ";
+            case INTEGER: {
+                typeLength = " INTEGER(" + Math.min(10, length) + ") ";
                 break;
             }
             case TINYINT: {
