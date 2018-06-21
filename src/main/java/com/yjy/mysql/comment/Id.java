@@ -12,5 +12,10 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({java.lang.annotation.ElementType.FIELD})
 public @interface Id {
-	
+
+    /**
+     * @return 是否自增长
+     */
+    boolean autoIncrease() default true;
+
 }

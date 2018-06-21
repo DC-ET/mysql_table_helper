@@ -136,7 +136,10 @@ public class MYSQL5Dialect {
                         .append(getColumn(field))
                         .append(" ")
                         .append(getTypeLength(getType(field), fieldAnnotation.length(), fieldAnnotation.decimalLength()))
-                        .append(" NOT NULL AUTO_INCREMENT");
+                        .append(" NOT NULL ");
+                if (isAutoIncrease(field)) {
+                    sql.append(" AUTO_INCREMENT ");
+                }
             }
             // 普通字段
             else {
@@ -265,6 +268,16 @@ public class MYSQL5Dialect {
         if ("".equals(column))
             column = getColumnByField(field.getName());
         return column;
+    }
+
+    /**
+     * 是否自增长
+     * @param idField id字段
+     * @return 是否
+     */
+    private static boolean isAutoIncrease(java.lang.reflect.Field idField) {
+        Id fieldAnnotation = idField.getAnnotation(Id.class);
+        return fieldAnnotation.autoIncrease();
     }
 
     /**

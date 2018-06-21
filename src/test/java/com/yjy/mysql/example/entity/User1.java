@@ -14,7 +14,7 @@ import java.util.Date;
 @Entity(tableName = "user1")
 public class User1 {
 
-    @Id
+    @Id(autoIncrease = false)
     @Field
     private Long id;
     @Field
