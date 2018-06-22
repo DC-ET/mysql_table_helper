@@ -25,7 +25,7 @@
 二、在项目启动时想尽办法执行以下代码(三选一)
 
 <b>1 > com.yjy.mysql.TableInitializer.init(CONFIG_PATH + "db.properties");</b><br/>
-<b>2 > com.yjy.mysql.TableInitializer.init(properties).init();</b>
+<b>2 > com.yjy.mysql.TableInitializer.init(properties).init();</b><br/>
 <b>3 > com.yjy.mysql.TableInitializer.init(config).init();</b>
 
 其中 CONFIG_PATH 是你的 db.properties 目录
