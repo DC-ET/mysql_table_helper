@@ -1,6 +1,7 @@
 package com.yjy.mysql.dialect;
 
 import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
+import com.yjy.mysql.analysis.ScanJar;
 import com.yjy.mysql.analysis.ScanPackage;
 import com.yjy.mysql.comment.Entity;
 import com.yjy.mysql.comment.Field;
@@ -47,6 +48,9 @@ public class MYSQL5Dialect {
             Set<Class<?>> clazzSet = new HashSet<Class<?>>();
             for (String package1 : this.config.getPackages()) {
                 clazzSet.addAll(ScanPackage.getClassesByPackageName(package1));
+                if (this.config.isScanJar()) {
+                    clazzSet.addAll(ScanJar.getClassesByPackageName(package1));
+                }
             }
             log.info("MYSQL5Dialect init > packagesSize: {}, auto : {}, classListSize : {}",
                     this.config.getPackages().length, this.config.getType(), clazzSet.size());

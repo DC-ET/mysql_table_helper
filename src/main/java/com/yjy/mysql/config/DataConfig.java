@@ -24,6 +24,7 @@ public class DataConfig implements Serializable {
     private String[] packages; // 实体类所在包, 将包含子包
     private String type; // 更新类型
     private boolean showSql; // 是否打印执行的SQL
+    private boolean scanJar = true; // 是否扫描jar中的实体
 
     public DataConfig(String[] packages, String url, String username, String password) {
         this(packages, url, username, password, DEFAULT_TYPE, DEFAULT_SHOW_SQL, DEFAULT_DRIVER);
@@ -41,7 +42,13 @@ public class DataConfig implements Serializable {
         this(packages, url, username, password, type, showSql, DEFAULT_DRIVER);
     }
 
-    public DataConfig(String[] packages, String url, String username, String password, String type, boolean showSql, String driver) {
+    public DataConfig(String[] packages, String url, String username, String password, String type, boolean showSql,
+                      String driver) {
+        this(packages, url, username, password, type, showSql, driver, true);
+    }
+
+    public DataConfig(String[] packages, String url, String username, String password, String type, boolean showSql,
+                      String driver, boolean scanJar) {
         this.packages = packages;
         this.url = url;
         this.username = username;
@@ -49,6 +56,7 @@ public class DataConfig implements Serializable {
         this.type = type;
         this.showSql = showSql;
         this.driver = driver;
+        this.scanJar = scanJar;
     }
 
     public String getDriver() {
@@ -117,6 +125,15 @@ public class DataConfig implements Serializable {
                 ", packages=" + Arrays.toString(packages) +
                 ", type='" + type + '\'' +
                 ", showSql=" + showSql +
+                ", scanJar=" + scanJar +
                 '}';
+    }
+
+    public boolean isScanJar() {
+        return scanJar;
+    }
+
+    public void setScanJar(boolean scanJar) {
+        this.scanJar = scanJar;
     }
 }

@@ -1,11 +1,13 @@
 package com.yjy.mysql.example.main;
 
 import com.yjy.mysql.TableInitializer;
+import com.yjy.mysql.analysis.ScanJar;
 import com.yjy.mysql.config.DataConfig;
 import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.Set;
 
 /**
  * 测试类
@@ -50,5 +52,18 @@ public class SimpleTest {
         DataConfig config = new DataConfig(packages, url, username, password, type, showSql);
         TableInitializer.init(config);
     }
+
+    // 测试扫描jar包
+    @Test
+    public void testScanJar() throws IOException, ClassNotFoundException {
+        // 加载Log4j配置
+        String log4jPath = this.getClass().getResource("/config/log4j.properties").getPath();
+        PropertyConfigurator.configure(log4jPath);
+        Set<Class<?>> set = ScanJar.getClassesByPackageName("org.apache.log4j.config");
+        for (Class<?> clazz : set) {
+            System.out.println(clazz);
+        }
+    }
+
 
 }
