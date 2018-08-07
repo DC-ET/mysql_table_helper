@@ -43,7 +43,6 @@ public class MYSQL5Dialect {
      */
     public void init() {
         try {
-            log.info("MYSQL5Dialect init...");
             this.connect = this.dataSource.getConnection();
             Set<Class<?>> clazzSet = new HashSet<Class<?>>();
             for (String package1 : this.config.getPackages()) {
@@ -88,7 +87,7 @@ public class MYSQL5Dialect {
      * @param clazzSet 表实体列表
      */
     private void create(Set<Class<?>> clazzSet) {
-        log.info("MYSQL5Dialect create...");
+        log.debug("MYSQL5Dialect create...");
         for (Class<?> clazz : clazzSet) {
             Entity entity; // 表实体
             String tableName;
@@ -117,7 +116,7 @@ public class MYSQL5Dialect {
      * @param clazz 表实体
      */
     private void createTable(String tableName, Class<?> clazz) {
-        log.info("MYSQL5Dialect createTable: {}", tableName);
+        log.debug("MYSQL5Dialect createTable: {}", tableName);
         String idField = null;
         boolean firstColumn = true;
         StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS " + tableName + "(\n");
@@ -165,7 +164,7 @@ public class MYSQL5Dialect {
      * @param clazzSet 表实体列表
      */
     private void update(Set<Class<?>> clazzSet) throws Exception {
-        log.info("MYSQL5Dialect update...");
+        log.debug("MYSQL5Dialect update...");
         for (Class<?> clazz : clazzSet) {
             Entity entity; // 表实体
             String tableName;
@@ -197,7 +196,7 @@ public class MYSQL5Dialect {
      * @param clazz 表实体
      */
     private void checkForAddColumn(Class<?> clazz) throws Exception {
-        log.info("MYSQL5Dialect checkForAddColumn ...");
+        log.debug("MYSQL5Dialect checkForAddColumn ...");
         // 遍历字段
         for (java.lang.reflect.Field field : clazz.getDeclaredFields()) {
             PreparedStatement ps;
@@ -227,7 +226,7 @@ public class MYSQL5Dialect {
      * @return 是否存在
      */
     private boolean checkTableExist(String name) {
-        log.info("MYSQL5Dialect checkTableExist...");
+        log.debug("MYSQL5Dialect checkTableExist > tableName: {}", name);
         PreparedStatement ps;
         ResultSet resultSet;
         try {
