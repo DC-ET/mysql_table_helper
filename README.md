@@ -42,3 +42,6 @@
 ### 调用例子
 
 * [simple example](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/yjy/mysql/example/main/SimpleTest.java)
+
+### 2018-08-14 更新
+* 新增Mybatis自动生成mapper.xml工具包 com.yjy.mysql.util.mybatis, 使用方法可以参考[测试例子](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/yjy/mysql/example/mybatis/SimpleTest.java)
