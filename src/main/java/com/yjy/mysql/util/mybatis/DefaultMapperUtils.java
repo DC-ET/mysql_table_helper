@@ -5,6 +5,7 @@ import com.yjy.mysql.comment.Id;
 import com.yjy.mysql.util.FieldUtils;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 
 import static com.yjy.mysql.util.FieldUtils.getColumn;
 
@@ -50,7 +51,14 @@ public class DefaultMapperUtils extends AbstractMapperUtils<MapperConfig> {
             String cacheClass = config.getCacheClass();
             if (cacheClass != null) {
                 xml.append("\t<!-- 启用二级缓存, 注意: 涉及到关联查询的sql需要标注 useCache=\"false\" -->\n");
-                xml.append("\t<cache type=\"").append(cacheClass).append("\" /> \n\n");
+                xml.append("\t<cache type=\"").append(cacheClass).append("\" > \n");
+                Map<String, String> pros = config.getCustomCachePros();
+                if (pros != null && !pros.isEmpty()) {
+                    for (String k : pros.keySet()) {
+                        xml.append("\t\t<property name=\"").append(k).append("\" value=\"").append(pros.get(k)).append("\" />\n");
+                    }
+                }
+                xml.append("\t</cache>\n\n");
             } else {
                 long cacheTime = config.getCacheTime();
                 xml.append("\t<!-- 启用二级缓存, 注意: 涉及到关联查询的sql需要标注 useCache=\"false\" -->\n");
