@@ -45,3 +45,6 @@
 
 ### 2018-08-14 更新版本 1.0.1
 * 新增Mybatis自动生成mapper.xml工具包 com.yjy.mysql.util.mybatis, 使用方法可以参考[测试例子](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/yjy/mysql/example/mybatis/SimpleTest.java)
+
+### 2018-09-03 更新版本 1.0.2
+* 增强 Mybatis自动生成mapper.xml工具包, 增加配置 自定义二级缓存类 相关的属性; 相关配置: customCachePros
