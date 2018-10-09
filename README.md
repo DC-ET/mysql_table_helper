@@ -24,9 +24,9 @@
    
 二、在项目启动时想尽办法执行以下代码(三选一)
 
-<b>1 > com.yjy.mysql.TableInitializer.init(CONFIG_PATH + "db.properties");</b><br/>
-<b>2 > com.yjy.mysql.TableInitializer.init(properties).init();</b><br/>
-<b>3 > com.yjy.mysql.TableInitializer.init(config).init();</b>
+<b>1 > TableInitializer.init(CONFIG_PATH + "db.properties");</b><br/>
+<b>2 > TableInitializer.init(properties).init();</b><br/>
+<b>3 > TableInitializer.init(config).init();</b>
 
 其中 CONFIG_PATH 是你的 db.properties 目录
 
@@ -41,12 +41,16 @@
 
 ### 调用例子
 
-* [simple example](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/yjy/mysql/example/main/SimpleTest.java)
+* [simple example](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/zoi7/mysql/example/main/SimpleTest.java)
 
 * [maven地址](http://mvnrepository.com/artifact/com.2oi7/mysql-table-helper)
 
 ### 2018-08-14 更新版本 1.0.1
-* 新增Mybatis自动生成mapper.xml工具包 com.yjy.mysql.util.mybatis, 使用方法可以参考[测试例子](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/yjy/mysql/example/mybatis/SimpleTest.java)
+* 新增Mybatis自动生成mapper.xml工具包 com.yjy.mysql.util.mybatis, 使用方法可以参考[测试例子](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/zoi7/mysql/example/mybatis/SimpleTest.java)
 
 ### 2018-09-03 更新版本 1.0.2
 * 增强 Mybatis自动生成mapper.xml工具包, 增加配置 自定义二级缓存类 相关的属性; 相关配置: customCachePros
+
+### 2018-10-09 更新版本 2.0.0
+* 重命名包名 com.yjy.mysql -> com.zoi7.mysql (由于 2oi7 不符合规范, 故将 z作为2)
+* 配置TYPE新增 none, 表示不自动更新表结构
