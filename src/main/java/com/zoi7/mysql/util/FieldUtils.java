@@ -4,6 +4,7 @@ import com.zoi7.mysql.comment.Field;
 import com.zoi7.mysql.comment.FieldType;
 import com.zoi7.mysql.comment.Id;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 
 /**
@@ -57,21 +58,25 @@ public class FieldUtils {
             // int
             if (clazz == Integer.class || clazz == int.class)
                 type = FieldType.INTEGER;
-                // long
+            // long
             else if (clazz == Long.class || clazz == long.class)
                 type = FieldType.BIGINT;
-                // double
+            // double
             else if (clazz == Double.class || clazz == double.class)
                 type = FieldType.DOUBLE;
-                // float
+            // float
             else if (clazz == Float.class || clazz == float.class)
                 type = FieldType.FLOAT;
-                // datetime
+            // datetime
             else if (clazz == Date.class || clazz == java.util.Date.class)
                 type = FieldType.DATETIME;
-                // 其他
-            else
+            // decimal
+            else if (clazz == BigDecimal.class)
+                type = FieldType.DECIMAL;
+            // 其他
+            else {
                 type = FieldType.VARCHAR;
+            }
         }
         if (type.equals(FieldType.INT)) {
             type = FieldType.INTEGER;
@@ -90,6 +95,17 @@ public class FieldUtils {
             return fieldAnnotation.autoIncrease();
         }
         return false;
+    }
+
+    /**
+     * 判断字段类型是否为数字
+     * @param type 类型
+     * @return 是否数字
+     */
+    public static boolean isNumber(FieldType type) {
+        return type.equals(FieldType.INTEGER) || type.equals(FieldType.INT) || type.equals(FieldType.BIGINT)
+                || type.equals(FieldType.SMALLINT) || type.equals(FieldType.TINYINT) || type.equals(FieldType.FLOAT)
+                || type.equals(FieldType.DOUBLE) || type.equals(FieldType.DECIMAL);
     }
 
 }

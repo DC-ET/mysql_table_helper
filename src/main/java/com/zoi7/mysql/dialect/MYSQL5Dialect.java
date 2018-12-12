@@ -259,10 +259,15 @@ public class MYSQL5Dialect {
      */
     private String getColumnSql(java.lang.reflect.Field field) {
         Field fieldAnnotation = field.getAnnotation(Field.class);
+        FieldType type = FieldUtils.getType(field);
+        String defVal = FieldUtils.isNumber(type) ? fieldAnnotation.defaultCharValue() : "\"" + fieldAnnotation.defaultCharValue() + "\"";
+        if (defVal.equals("")) {
+            defVal = String.valueOf(fieldAnnotation.defaultValue());
+        }
         return " " + FieldUtils.getColumn(field) + " "
-                + getTypeLength(FieldUtils.getType(field), fieldAnnotation.length(), fieldAnnotation.decimalLength()) + " "
+                + getTypeLength(type, fieldAnnotation.length(), fieldAnnotation.decimalLength()) + " "
                 + (fieldAnnotation.nullable() ? " " : " NOT NULL ") +
-                (!fieldAnnotation.nullable() ? " default " + fieldAnnotation.defaultValue() : "");
+                (!fieldAnnotation.nullable() ? " default " + defVal : "");
     }
 
     /**

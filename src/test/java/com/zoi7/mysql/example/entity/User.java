@@ -5,6 +5,8 @@ import com.zoi7.mysql.comment.Field;
 import com.zoi7.mysql.comment.FieldType;
 import com.zoi7.mysql.comment.Id;
 
+import java.math.BigDecimal;
+
 /**
  * 测试用 > 用户表实体
  * Created by yjy on 2017/9/22.
@@ -15,34 +17,27 @@ public class User {
     @Id
     @Field(field = "id", type = FieldType.BIGINT)
     private Long id;
-
     @Field(field = "user_name", type = FieldType.VARCHAR, length = 50)
     private String userName;
-
     @Field(field = "password", type = FieldType.VARCHAR, length = 30)
     private String password;
+    @Field(nullable = false, defaultCharValue = "游客")
+    private String nickName;
+    @Field(nullable = false, defaultValue = 1)
+    private Integer sex;
+    @Field(nullable = false, defaultCharValue = "8454541456231")
+    private Long money;
+    @Field(nullable = false, defaultCharValue = "0.98")
+    private Double health;
+    @Field(nullable = false)
+    private BigDecimal gold;
+    @Field(nullable = false)
+    private Integer sex2;
+    @Field(nullable = false)
+    private BigDecimal gold2;
+    @Field(nullable = false, defaultValue = 3)
+    private Integer sex3;
+    @Field(nullable = false, defaultCharValue = "55")
+    private BigDecimal gold3;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

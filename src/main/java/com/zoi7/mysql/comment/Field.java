@@ -44,8 +44,14 @@ public @interface Field {
 	
 	/**
 	 * @return 新加字段不为空 时 旧数据填补默认值
-	 * 仅限int类型字段
+	 * 整数类型的字段默认值可使用此属性, 当然也可以使用defaultCharVal
 	 */
 	int defaultValue() default -1;
+
+    /**
+     * @return 新字段不为空时, 填补默认值
+     * 可以指定任意类型字段的默认值
+     */
+	String defaultCharValue() default "";
 	
 }

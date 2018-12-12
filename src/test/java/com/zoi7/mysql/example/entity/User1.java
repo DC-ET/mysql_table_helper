@@ -17,13 +17,13 @@ public class User1 {
     @Id(autoIncrease = false)
     @Field
     private Long id;
-    @Field
+    @Field(nullable = false, defaultCharValue = "hello world")
     private String username;
     @Field(length = 30)
     private String nickName;
     @Field
     private Integer sex;
-    @Field
+    @Field(nullable = false, defaultValue = 1)
     private int type;
     @Field
     private Date addTime;
