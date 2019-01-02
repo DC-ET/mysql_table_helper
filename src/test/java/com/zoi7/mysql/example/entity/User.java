@@ -6,6 +6,7 @@ import com.zoi7.mysql.comment.FieldType;
 import com.zoi7.mysql.comment.Id;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * 测试用 > 用户表实体
@@ -39,5 +40,7 @@ public class User {
     private Integer sex3;
     @Field(nullable = false, defaultCharValue = "55")
     private BigDecimal gold3;
+    @Field(nullable = false, defaultCharValue = "20181218")
+    private Date updateTime;
 
 }

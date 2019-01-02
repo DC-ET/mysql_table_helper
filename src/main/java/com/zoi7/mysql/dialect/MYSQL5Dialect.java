@@ -1,6 +1,5 @@
 package com.zoi7.mysql.dialect;
 
-import com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException;
 import com.zoi7.mysql.analysis.ScanJar;
 import com.zoi7.mysql.analysis.ScanPackage;
 import com.zoi7.mysql.comment.Entity;
@@ -240,10 +239,10 @@ public class MYSQL5Dialect {
             ps.close();
             resultSet.close();
             return hasRow;
-        } catch (MySQLSyntaxErrorException e1) {
+        } catch (SQLException e1) {
             String message = e1.getMessage();
             if (message != null &&
-                (message.contains("1146") || Pattern.matches("Table '.*' doesn't exist", message))) {
+                    (message.contains("1146") || Pattern.matches("Table '.*' doesn't exist", message))) {
                 return false;
             } else
                 throw new RuntimeException(e1);

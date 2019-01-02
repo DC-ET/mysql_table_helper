@@ -14,7 +14,8 @@ public class DataConfig implements Serializable {
     public static final String TYPE_CREATE = "create"; // 新建表, 如果存在旧表, 则删除
     public static final String TYPE_UPDATE = "update"; // 更新表结构, 如果不存在表, 则创建
 
-    public static final String DEFAULT_DRIVER = "com.mysql.jdbc.Driver";
+//    public static final String DEFAULT_DRIVER = "com.mysql.jdbc.Driver";
+    public static final String DEFAULT_DRIVER = "com.mysql.cj.jdbc.Driver";
     public static final String DEFAULT_TYPE = TYPE_UPDATE;
     public static final boolean DEFAULT_SHOW_SQL = true;
 
