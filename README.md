@@ -54,3 +54,10 @@
 ### 2018-10-09 更新版本 2.0.0
 * 重命名包名 com.yjy.mysql -> com.zoi7.mysql (由于 2oi7 不符合规范, 故将 z作为2)
 * 配置TYPE新增 none, 表示不自动更新表结构
+
+### 2019-1-2 更新版本 2.1.0
+* 更新mysql驱动版本至: 5.1.30 -> 8.0.13
+    1. 需要注意的地方: 
+       1. driver需要修改 com.mysql.jdbc.Driver -> com.mysql.cj.jdbc.Driver
+       1. url中需要增加参数 serverTimezone=GMT
+       1. url中原 &amp; 需要改为 &
