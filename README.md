@@ -64,3 +64,8 @@
        1. driver需要修改 com.mysql.jdbc.Driver -> com.mysql.cj.jdbc.Driver
        1. url中需要增加参数 serverTimezone=GMT
        1. url中原 &amp; 需要改为 &
+
+### 2019-1-8 更新版本 2.1.1
+* 新增支持注解配置表/字段注释, 相关属性 @Entity | @Field > comment
+* 新增支持注解配置单列索引, 相关属性 @Field > index
+* 新增支持配置表字段是否大写模式

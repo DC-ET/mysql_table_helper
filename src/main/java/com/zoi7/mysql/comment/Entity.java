@@ -4,6 +4,7 @@ import java.lang.annotation.*;
 
 /**
  * 表实体注解
+ * 支持创建单列字段索引 {@link com.zoi7.mysql.comment.Field}
  * @author yjy
  * 2017年2月24日上午9:36:17
  */
@@ -26,5 +27,10 @@ public @interface Entity {
 	 * @return if check
 	 */
 	boolean check() default true;
+
+    /**
+     * @return 表注释
+     */
+	String comment() default "";
 	
 }

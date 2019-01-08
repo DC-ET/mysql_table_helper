@@ -77,7 +77,7 @@ public class DefaultMapperUtils extends AbstractMapperUtils<MapperConfig> {
                 } else {
                     xml.append("\t\t<result ");
                 }
-                xml.append("column=\"").append(FieldUtils.getColumn(field))
+                xml.append("column=\"").append(FieldUtils.getColumn(field, config.isUppercase()))
                         .append("\" property=\"").append(field.getName())
                         .append("\" jdbcType=\"").append(getJdbcType(field)).append("\"/>\n");
             }
@@ -86,7 +86,7 @@ public class DefaultMapperUtils extends AbstractMapperUtils<MapperConfig> {
 
         xml.append("\t<insert id=\"save\" parameterMap=\"parameterType\" ");
         if (idField != null && FieldUtils.isAutoIncrease(idField)) {
-            xml.append("useGeneratedKeys=\"true\" keyColumn=\"").append(FieldUtils.getColumn(idField)).append("\"")
+            xml.append("useGeneratedKeys=\"true\" keyColumn=\"").append(FieldUtils.getColumn(idField, config.isUppercase())).append("\"")
                     .append(" keyProperty=\"").append(idField.getName()).append("\" ");
         }
         xml.append(">\n");
@@ -101,7 +101,7 @@ public class DefaultMapperUtils extends AbstractMapperUtils<MapperConfig> {
                     } else {
                         first = false;
                     }
-                    xml.append(FieldUtils.getColumn(field));
+                    xml.append(FieldUtils.getColumn(field, config.isUppercase()));
                 }
             }
         }
@@ -138,28 +138,28 @@ public class DefaultMapperUtils extends AbstractMapperUtils<MapperConfig> {
                         } else {
                             first = false;
                         }
-                        xml.append("\n\t\t\t").append(FieldUtils.getColumn(field));
+                        xml.append("\n\t\t\t").append(FieldUtils.getColumn(field, config.isUppercase()));
                         xml.append(" = #{").append(field.getName()).append("}");
                     }
                 }
             }
             xml.append("\n\t\t</set>\n");
             xml.append("\t\t<where>\n");
-            xml.append("\t\t\t").append(FieldUtils.getColumn(idField)).append(" = #{").append(idField.getName()).append("} \n");
+            xml.append("\t\t\t").append(FieldUtils.getColumn(idField, config.isUppercase())).append(" = #{").append(idField.getName()).append("} \n");
             xml.append("\t\t</where>\n");
             xml.append("\t</update>\n\n");
 
             xml.append("\t<delete id=\"delete\" parameterType=\"long\" >\n");
             xml.append("\t\tdelete from <include refid=\"table_name\"/> \n ");
             xml.append("\t\t<where>\n");
-            xml.append("\t\t\t").append(FieldUtils.getColumn(idField)).append(" = #{param1}\n");
+            xml.append("\t\t\t").append(FieldUtils.getColumn(idField, config.isUppercase())).append(" = #{param1}\n");
             xml.append("\t\t</where>\n");
             xml.append("\t</delete>\n\n");
 
             xml.append("\t<select id=\"findById\" parameterType=\"long\" resultMap=\"resultList\" >\n");
             xml.append("\t\tselect * from <include refid=\"table_name\"/> \n");
             xml.append("\t\t<where>\n");
-            xml.append("\t\t\t").append(FieldUtils.getColumn(idField)).append(" = #{param1}\n");
+            xml.append("\t\t\t").append(FieldUtils.getColumn(idField, config.isUppercase())).append(" = #{param1}\n");
             xml.append("\t\t</where>\n");
             xml.append("\t</select>\n\n");
 
@@ -174,7 +174,7 @@ public class DefaultMapperUtils extends AbstractMapperUtils<MapperConfig> {
         for (Field field : fields) {
             if (field.isAnnotationPresent(com.zoi7.mysql.comment.Field.class)) {
                 xml.append("\t\t\t<if test=\"").append(field.getName()).append(" != null\">");
-                xml.append(" and ").append(FieldUtils.getColumn(field)).append(" = #{").append(field.getName()).append("} ");
+                xml.append(" and ").append(FieldUtils.getColumn(field, config.isUppercase())).append(" = #{").append(field.getName()).append("} ");
                 xml.append(" </if>\n");
             }
         }
@@ -198,7 +198,7 @@ public class DefaultMapperUtils extends AbstractMapperUtils<MapperConfig> {
         for (Field field : fields) {
             if (field.isAnnotationPresent(com.zoi7.mysql.comment.Field.class)) {
                 xml.append("\t\t\t<if test=\"param3.").append(field.getName()).append(" != null\">");
-                xml.append(" and ").append(FieldUtils.getColumn(field)).append(" = #{param3.").append(field.getName()).append("} ");
+                xml.append(" and ").append(FieldUtils.getColumn(field, config.isUppercase())).append(" = #{param3.").append(field.getName()).append("} ");
                 xml.append(" </if>\n");
             }
         }
@@ -214,23 +214,23 @@ public class DefaultMapperUtils extends AbstractMapperUtils<MapperConfig> {
             for (Field field : fields) {
                 if (field.isAnnotationPresent(com.zoi7.mysql.comment.Field.class)) {
                     xml.append("\t\t\t<if test=\"param3.").append(field.getName()).append(" != null\">");
-                    xml.append(" and ").append(FieldUtils.getColumn(field)).append(" = #{param3.").append(field.getName()).append("} ");
+                    xml.append(" and ").append(FieldUtils.getColumn(field, config.isUppercase())).append(" = #{param3.").append(field.getName()).append("} ");
                     xml.append(" </if>\n");
                 }
             }
             xml.append("\t\t</where>\n");
-            xml.append("\t\torder by ").append(FieldUtils.getColumn(idField)).append(" desc\n");
+            xml.append("\t\torder by ").append(FieldUtils.getColumn(idField, config.isUppercase())).append(" desc\n");
             xml.append("\t\tlimit #{param1},#{param2}\n");
             xml.append("\t</select>\n\n");
 
             xml.append("\t<select id=\"findCount\" parameterMap=\"parameterType\" resultType=\"int\">\n");
-            xml.append("\t\tselect count(").append(FieldUtils.getColumn(idField)).append(") from <include refid=\"table_name\"/>\n");
+            xml.append("\t\tselect count(").append(FieldUtils.getColumn(idField, config.isUppercase())).append(") from <include refid=\"table_name\"/>\n");
             xml.append("\t\t<where>\n");
             xml.append("\t\t\t1=1\n");
             for (Field field : fields) {
                 if (field.isAnnotationPresent(com.zoi7.mysql.comment.Field.class)) {
                     xml.append("\t\t\t<if test=\"").append(field.getName()).append(" != null\">");
-                    xml.append(" and ").append(FieldUtils.getColumn(field)).append(" = #{").append(field.getName()).append("} ");
+                    xml.append(" and ").append(FieldUtils.getColumn(field, config.isUppercase())).append(" = #{").append(field.getName()).append("} ");
                     xml.append(" </if>\n");
                 }
             }

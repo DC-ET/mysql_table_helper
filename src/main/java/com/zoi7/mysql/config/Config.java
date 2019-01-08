@@ -52,8 +52,9 @@ public class Config {
         String packages = tablePros.getProperty("db.packages");
         String type = tablePros.getProperty("db.auto");
         String showSql = tablePros.getProperty("db.showSql");
+        String uppercase = tablePros.getProperty("db.uppercase");
         DataConfig config = new DataConfig(dealPackages(packages), dbUrl.trim(), dbUsername.trim(), dbPassword.trim(),
-                type.trim(), Boolean.parseBoolean(showSql.trim()), dbDriverName.trim());
+                type.trim(), Boolean.parseBoolean(showSql.trim()), dbDriverName.trim(), Boolean.parseBoolean(uppercase.trim()));
         loadConfig(config);
     }
 

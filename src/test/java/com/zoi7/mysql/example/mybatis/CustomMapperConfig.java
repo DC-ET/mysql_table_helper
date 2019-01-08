@@ -37,9 +37,15 @@ public class CustomMapperConfig extends MapperConfig {
         super(entityPackage, mapperPackage, xmlOutPut, useCache, cacheTime, cacheClass, maxLimit);
     }
 
+    public CustomMapperConfig(String entityPackage, String mapperPackage, String xmlOutPut, boolean useCache,
+                        long cacheTime, String cacheClass, int maxLimit, boolean uppercase) {
+        super(entityPackage, mapperPackage, xmlOutPut, useCache, cacheTime, cacheClass, maxLimit, uppercase, null);
+    }
+
     public boolean isCreateDelete() {
         return createDelete;
     }
+
 
     public void setCreateDelete(boolean createDelete) {
         this.createDelete = createDelete;

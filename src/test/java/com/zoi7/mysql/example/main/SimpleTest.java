@@ -7,7 +7,9 @@ import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
 import javax.naming.ConfigurationException;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -19,13 +21,13 @@ public class SimpleTest {
     @Test
     public void main() throws IOException, ConfigurationException {
 
-        // 加载Log4j配置
-        String log4jPath = this.getClass().getResource("/config/log4j.properties").getPath();
-        PropertyConfigurator.configure(log4jPath);
-
-        // 1.以标准配置文件的方式调用初始化
-        String dbPropertiesPath = this.getClass().getResource("/config/db.properties").getPath();
-        TableInitializer.init(dbPropertiesPath);
+//        // 加载Log4j配置
+//        String log4jPath = this.getClass().getResource("/config/log4j.properties").getPath();
+//        PropertyConfigurator.configure(log4jPath);
+//
+//        // 1.以标准配置文件的方式调用初始化
+//        String dbPropertiesPath = this.getClass().getResource("/config/db.properties").getPath();
+//        TableInitializer.init(dbPropertiesPath);
 
 //        // 2.组合现有的配置调用初始化
 //        String otherPropertiesPath = this.getClass().getResource("/config/other-db.properties").getPath();
@@ -40,18 +42,21 @@ public class SimpleTest {
 //        properties.setProperty("db.packages", otherProperties.getProperty("packages"));
 //        properties.setProperty("db.auto", otherProperties.getProperty("auto"));
 //        properties.setProperty("db.showSql", otherProperties.getProperty("showSql"));
+//        properties.setProperty("db.uppercase", otherProperties.getProperty("uppercase"));
 //        TableInitializer.init(properties);
 
 
-//        // 3.自定义配置 (优势: 无需配置文件, 简单明了)
-//        String[] packages = new String[]{"com.zoi7.mysql.example"};
-//        String url = "jdbc:mysql://127.0.0.1:3306/table_helper_test?useUnicode=true&serverTimezone=GMT";
-//        String username = "yjy";
-//        String password = "yyyyyy";
-//        boolean showSql = true;
-//        String type = DataConfig.TYPE_UPDATE;
-//        DataConfig config = new DataConfig(packages, url, username, password, type, showSql);
-//        TableInitializer.init(config);
+        // 3.自定义配置 (优势: 无需配置文件, 简单明了)
+        String[] packages = new String[]{"com.zoi7.mysql.example"};
+        String url = "jdbc:mysql://127.0.0.1:3306/table_helper_test?useUnicode=true&serverTimezone=GMT";
+        String username = "yjy";
+        String password = "yyyyyy";
+        boolean showSql = true;
+        boolean uppercase = true;
+        String type = DataConfig.TYPE_UPDATE;
+        DataConfig config = new DataConfig(packages, url, username, password, type, showSql);
+        config.setUppercase(uppercase);
+        TableInitializer.init(config);
     }
 
     // 测试扫描jar包

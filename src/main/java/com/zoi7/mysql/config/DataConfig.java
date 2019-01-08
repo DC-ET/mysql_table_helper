@@ -27,6 +27,7 @@ public class DataConfig implements Serializable {
     private String type; // 更新类型
     private boolean showSql; // 是否打印执行的SQL
     private boolean scanJar = true; // 是否扫描jar中的实体
+    private boolean uppercase = false; // 表字段是否大写, 默认小写
 
     public DataConfig(String[] packages, String url, String username, String password) {
         this(packages, url, username, password, DEFAULT_TYPE, DEFAULT_SHOW_SQL, DEFAULT_DRIVER);
@@ -51,6 +52,11 @@ public class DataConfig implements Serializable {
 
     public DataConfig(String[] packages, String url, String username, String password, String type, boolean showSql,
                       String driver, boolean scanJar) {
+        this(packages, url, username, password, type, showSql, driver, scanJar, false);
+    }
+
+    public DataConfig(String[] packages, String url, String username, String password, String type, boolean showSql,
+                      String driver, boolean scanJar, boolean uppercase) {
         this.packages = packages;
         this.url = url;
         this.username = username;
@@ -59,6 +65,7 @@ public class DataConfig implements Serializable {
         this.showSql = showSql;
         this.driver = driver;
         this.scanJar = scanJar;
+        this.uppercase = uppercase;
     }
 
     public String getDriver() {
@@ -117,6 +124,22 @@ public class DataConfig implements Serializable {
         this.showSql = showSql;
     }
 
+    public boolean isUppercase() {
+        return uppercase;
+    }
+
+    public void setUppercase(boolean uppercase) {
+        this.uppercase = uppercase;
+    }
+
+    public boolean isScanJar() {
+        return scanJar;
+    }
+
+    public void setScanJar(boolean scanJar) {
+        this.scanJar = scanJar;
+    }
+
     @Override
     public String toString() {
         return "DataConfig{" +
@@ -128,14 +151,7 @@ public class DataConfig implements Serializable {
                 ", type='" + type + '\'' +
                 ", showSql=" + showSql +
                 ", scanJar=" + scanJar +
+                ", uppercase=" + uppercase +
                 '}';
-    }
-
-    public boolean isScanJar() {
-        return scanJar;
-    }
-
-    public void setScanJar(boolean scanJar) {
-        this.scanJar = scanJar;
     }
 }

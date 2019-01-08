@@ -1,9 +1,6 @@
 package com.zoi7.mysql.example.entity;
 
-import com.zoi7.mysql.comment.Entity;
-import com.zoi7.mysql.comment.Field;
-import com.zoi7.mysql.comment.FieldType;
-import com.zoi7.mysql.comment.Id;
+import com.zoi7.mysql.comment.*;
 
 import java.util.Date;
 
@@ -11,7 +8,7 @@ import java.util.Date;
  * @author yjy
  * 2018-05-28 17:49
  */
-@Entity(tableName = "user1")
+@Entity(tableName = "user1", comment = "测试用户表1111")
 public class User1 {
 
     @Id(autoIncrease = false)
@@ -33,6 +30,20 @@ public class User1 {
     private Integer intToStr;
     @Field(nullable = false)
     private Integer notNull;
+    @Field(comment = "测试注释1", index = @Index(name = "uniquetettttttt", unique = true))
+    private String testComment;
+    @Field(comment = "测试注释2", index = @Index(name = "tettttttt", unique = false))
+    private String testComment2;
+    @Field
+    private String testComment3;
+
+    public String getTestComment() {
+        return testComment;
+    }
+
+    public void setTestComment(String testComment) {
+        this.testComment = testComment;
+    }
 
     public Long getId() {
         return id;
@@ -68,6 +79,22 @@ public class User1 {
 
     public int getType() {
         return type;
+    }
+
+    public String getTestComment2() {
+        return testComment2;
+    }
+
+    public void setTestComment2(String testComment2) {
+        this.testComment2 = testComment2;
+    }
+
+    public String getTestComment3() {
+        return testComment3;
+    }
+
+    public void setTestComment3(String testComment3) {
+        this.testComment3 = testComment3;
     }
 
     public void setType(int type) {

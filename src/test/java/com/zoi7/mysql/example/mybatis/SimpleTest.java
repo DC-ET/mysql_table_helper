@@ -15,16 +15,17 @@ public class SimpleTest {
 
     public static void main(String[] args) throws IOException {
         // 表实体所在包
-        String entityPackage = "com.yjy.mysql.example.entity";
+        String entityPackage = "com.zoi7.mysql.example.entity";
         // Mapper接口所在包, Mapper接口需要自己写
-        String mapperPackage = "com.yjy.mysql.example.mapper";
+        String mapperPackage = "com.zoi7.mysql.example.mapper";
         // 指定 mapper.xml 文件保存位置, 需要以 \ 或 / 结尾
-        String xmlOutPut= "E:\\JavaWork\\space1\\tableHelper\\target\\";
+        String xmlOutPut= "E:\\work\\maven\\tableHelper\\target\\";
 
         // 使用默认的工具进行生成
         Map<String, String> customCachePros = new HashMap<String, String>();
         customCachePros.put("interval", "15000");
-        MapperConfig config = new MapperConfig(entityPackage, mapperPackage, xmlOutPut, "com.yjy.mysql.CustomCacheClass", customCachePros);
+        MapperConfig config = new MapperConfig(entityPackage, mapperPackage, xmlOutPut, "com.zoi7.mysql.CustomCacheClass", customCachePros);
+        config.setUppercase(true);
         DefaultMapperUtils.INSTANCE.makeAll(config);
 
         // 使用自定义的方式生成

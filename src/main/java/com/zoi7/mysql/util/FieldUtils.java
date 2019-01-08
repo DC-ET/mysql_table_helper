@@ -19,11 +19,20 @@ public class FieldUtils {
      * @return 字段名
      */
     public static String getColumn(java.lang.reflect.Field field) {
+        return getColumn(field, false);
+    }
+
+    /**
+     * 获取字段名
+     * @param field 属性名
+     * @return 字段名
+     */
+    public static String getColumn(java.lang.reflect.Field field, boolean uppercase) {
         Field fieldAnnotation = field.getAnnotation(Field.class);
         // 字段名
         String column = fieldAnnotation.field();
         if ("".equals(column))
-            column = getColumnByField(field.getName());
+            column = getColumnByField(field.getName(), uppercase);
         return column;
     }
 
@@ -33,6 +42,16 @@ public class FieldUtils {
      * @return 字段名
      */
     public static String getColumnByField(String fieldName) {
+        return getColumnByField(fieldName, false);
+    }
+
+    /**
+     * 根据属性名获取字段名
+     * @param fieldName 属性名
+     * @param uppercase 是否大写
+     * @return 字段名
+     */
+    public static String getColumnByField(String fieldName, boolean uppercase) {
         StringBuilder column = new StringBuilder();
         for (int i = 0; i < fieldName.length(); i++) {
             char c = fieldName.charAt(i);
@@ -42,7 +61,8 @@ public class FieldUtils {
             }
             column.append(c);
         }
-        return column.toString();
+        String field = column.toString();
+        return uppercase ? field.toUpperCase() : field;
     }
 
     /**

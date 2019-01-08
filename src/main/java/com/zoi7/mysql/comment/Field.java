@@ -53,5 +53,15 @@ public @interface Field {
      * 可以指定任意类型字段的默认值
      */
 	String defaultCharValue() default "";
-	
+
+    /**
+     * @return 字段注释
+     */
+	String comment() default "";
+
+    /**
+     * @return 唯一索引名称 (默认不创建唯一索引)
+     */
+	Index index() default @Index(index = false);
+
 }

@@ -8,6 +8,7 @@ import java.util.Map;
  */
 public class MapperConfig {
 
+    private boolean uppercase = false; // 字段是否是大写
     private String entityPackage; // 实体类所在包
     private String mapperPackage; // mapper接口所在包
     private String xmlOutPut; // xml文件输出位置
@@ -48,6 +49,12 @@ public class MapperConfig {
 
     public MapperConfig(String entityPackage, String mapperPackage, String xmlOutPut, boolean useCache,
                         long cacheTime, String cacheClass, int maxLimit, Map<String, String> customCachePros) {
+        this(entityPackage, mapperPackage, xmlOutPut, useCache, cacheTime, cacheClass, maxLimit, false, customCachePros);
+    }
+
+    public MapperConfig(String entityPackage, String mapperPackage, String xmlOutPut, boolean useCache,
+                        long cacheTime, String cacheClass, int maxLimit, boolean uppercase,
+                        Map<String, String> customCachePros) {
         this.entityPackage = entityPackage;
         this.mapperPackage = mapperPackage;
         this.xmlOutPut = xmlOutPut;
@@ -55,6 +62,7 @@ public class MapperConfig {
         this.cacheTime = cacheTime;
         this.cacheClass = cacheClass;
         this.maxLimit = maxLimit;
+        this.uppercase = uppercase;
         this.customCachePros = customCachePros;
     }
 
@@ -84,6 +92,14 @@ public class MapperConfig {
 
     public boolean isUseCache() {
         return useCache;
+    }
+
+    public boolean isUppercase() {
+        return uppercase;
+    }
+
+    public void setUppercase(boolean uppercase) {
+        this.uppercase = uppercase;
     }
 
     public void setUseCache(boolean useCache) {

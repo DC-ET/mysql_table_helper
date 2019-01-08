@@ -2,10 +2,7 @@ package com.zoi7.mysql.dialect;
 
 import com.zoi7.mysql.analysis.ScanJar;
 import com.zoi7.mysql.analysis.ScanPackage;
-import com.zoi7.mysql.comment.Entity;
-import com.zoi7.mysql.comment.Field;
-import com.zoi7.mysql.comment.FieldType;
-import com.zoi7.mysql.comment.Id;
+import com.zoi7.mysql.comment.*;
 import com.zoi7.mysql.config.Config;
 import com.zoi7.mysql.config.DataConfig;
 import com.zoi7.mysql.driverManager.DriverManagerDataSource;
@@ -108,16 +105,17 @@ public class MYSQL5Dialect {
             // 删除原有表
             this.sqlList.add("DROP TABLE IF EXISTS " + tableName + ";");
             // 创建新表
-            createTable(tableName, clazz);
+            createTable(entity, clazz);
         }
     }
 
     /**
      * 新建表
-     * @param tableName 表名
+     * @param entity 表信息
      * @param clazz 表实体
      */
-    private void createTable(String tableName, Class<?> clazz) {
+    private void createTable(Entity entity, Class<?> clazz) {
+        String tableName = entity.tableName();
         log.debug("MYSQL5Dialect createTable: {}", tableName);
         String idField = null;
         boolean firstColumn = true;
@@ -139,9 +137,9 @@ public class MYSQL5Dialect {
             // 如果是id字段 > 标记 & not null
             if (field.isAnnotationPresent(Id.class)) {
                 if (idField == null)
-                    idField = FieldUtils.getColumn(field);
+                    idField = FieldUtils.getColumn(field, config.isUppercase());
                 sql.append("\t")
-                        .append(FieldUtils.getColumn(field))
+                        .append(FieldUtils.getColumn(field, config.isUppercase()))
                         .append(" ")
                         .append(getTypeLength(FieldUtils.getType(field), fieldAnnotation.length(), fieldAnnotation.decimalLength()))
                         .append(" NOT NULL ");
@@ -152,12 +150,19 @@ public class MYSQL5Dialect {
             // 普通字段
             else {
                 sql.append("\t").append(getColumnSql(field));
+                // if 有索引
+                if (fieldAnnotation.index().index()) {
+                    sql.append(",\n\t");
+                    sql.append(getIndexSql(field));
+                }
             }
         }
         if (idField != null) {
             sql.append(", PRIMARY KEY (").append(idField).append(")");
         }
-        sql.append(");");
+        sql.append(") COMMENT \"");
+        sql.append(entity.comment());
+        sql.append("\" ;");
         this.sqlList.add(sql.toString());
     }
 
@@ -184,7 +189,7 @@ public class MYSQL5Dialect {
             }
             // 如果表不存在, 则新建表
             if (!checkTableExist(tableName)) {
-                createTable(tableName, clazz);
+                createTable(entity, clazz);
             }
             // 如果表已存在, 则检查并更新字段
             else {
@@ -208,14 +213,19 @@ public class MYSQL5Dialect {
                 continue;
             }
             // 检查字段是否存在
-            String assertField = "DESCRIBE " + (clazz.getAnnotation(Entity.class)).tableName() + " " + FieldUtils.getColumn(field);
+            String assertField = "DESCRIBE " + (clazz.getAnnotation(Entity.class)).tableName() + " " + FieldUtils.getColumn(field, config.isUppercase());
             ps = this.connect.prepareStatement(assertField, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
             resultSet = ps.executeQuery();
             // 不存在则新增字段
             if (!resultSet.last()) {
-                String alterSql = "ALTER TABLE " + (clazz.getAnnotation(Entity.class)).tableName() +
-                        " ADD COLUMN " + getColumnSql(field);
+                String tableName = clazz.getAnnotation(Entity.class).tableName();
+                String alterSql = "ALTER TABLE " + tableName + " ADD COLUMN " + getColumnSql(field);
                 this.alterUpdates.add(alterSql);
+                Field field1 = field.getAnnotation(Field.class);
+                if (field1.index().index()) {
+                    String indexSql = "ALTER TABLE " + tableName + " ADD " + getIndexSql(field);
+                    this.alterUpdates.add(indexSql);
+                }
             }
             ps.close();
             resultSet.close();
@@ -258,15 +268,39 @@ public class MYSQL5Dialect {
      */
     private String getColumnSql(java.lang.reflect.Field field) {
         Field fieldAnnotation = field.getAnnotation(Field.class);
+        // 字段名
+        String column = FieldUtils.getColumn(field, config.isUppercase());
         FieldType type = FieldUtils.getType(field);
+        String typeLength = getTypeLength(type, fieldAnnotation.length(), fieldAnnotation.decimalLength());
+        String nullableString = (fieldAnnotation.nullable() ? " " : " NOT NULL ");
         String defVal = FieldUtils.isNumber(type) ? fieldAnnotation.defaultCharValue() : "\"" + fieldAnnotation.defaultCharValue() + "\"";
         if (defVal.equals("")) {
             defVal = String.valueOf(fieldAnnotation.defaultValue());
         }
-        return " " + FieldUtils.getColumn(field) + " "
-                + getTypeLength(type, fieldAnnotation.length(), fieldAnnotation.decimalLength()) + " "
-                + (fieldAnnotation.nullable() ? " " : " NOT NULL ") +
-                (!fieldAnnotation.nullable() ? " default " + defVal : "");
+        String defaultString = (!fieldAnnotation.nullable() ? " default " + defVal : "");
+        String comment = " COMMENT \"" + fieldAnnotation.comment() + "\"";
+        return " " + column + " " + typeLength + " " + nullableString + " " + defaultString + " " + comment;
+    }
+
+    /**
+     * 获取索引对应的 sql语句
+     * @param field 字段
+     * @return sql
+     */
+    private String getIndexSql(java.lang.reflect.Field field) {
+        Field fieldAnnotation = field.getAnnotation(Field.class);
+        // 字段名
+        String column = FieldUtils.getColumn(field, config.isUppercase());
+        String indexString = "";
+        Index index = fieldAnnotation.index();
+        if (index.index()) {
+            indexString += index.unique()? "UNIQUE INDEX " : "INDEX ";
+            if (!"".equals(index.name())) {
+                indexString += index.name();
+            }
+            indexString += "(" + column + ") ";
+        }
+        return indexString;
     }
 
     /**
