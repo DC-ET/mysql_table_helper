@@ -36,6 +36,9 @@ public abstract class AbstractMapperUtils<T extends MapperConfig> {
     protected abstract String getXmlString(Class<?> clazz, T config);
 
     private static void createFile(String xml, String fileName, String xmlOutPut) throws IOException {
+        if (!xmlOutPut.endsWith("\\") && !xmlOutPut.endsWith("/")) {
+            xmlOutPut += "\\";
+        }
         File xmlFile = new File(xmlOutPut + fileName);
         FileWriter writer = new FileWriter(xmlFile);
         writer.write(xml);
