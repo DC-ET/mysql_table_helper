@@ -7,9 +7,7 @@ import org.apache.log4j.PropertyConfigurator;
 import org.junit.Test;
 
 import javax.naming.ConfigurationException;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -19,7 +17,7 @@ import java.util.Set;
 public class SimpleTest {
 
     @Test
-    public void main() throws IOException, ConfigurationException {
+    public void test1() throws IOException, ConfigurationException {
 
 //        // 加载Log4j配置
 //        String log4jPath = this.getClass().getResource("/config/log4j.properties").getPath();
@@ -48,7 +46,7 @@ public class SimpleTest {
 
         // 3.自定义配置 (优势: 无需配置文件, 简单明了)
         String[] packages = new String[]{"com.zoi7.mysql.example"};
-        String url = "jdbc:mysql://127.0.0.1:3306/table_helper_test?useUnicode=true&serverTimezone=GMT";
+        String url = "jdbc:mysql://127.0.0.1:3306/table_helper_test?useUnicode=true&serverTimezone=GMT&allowMultiQueries=true";
         String username = "yjy";
         String password = "yyyyyy";
         boolean showSql = true;

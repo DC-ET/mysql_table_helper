@@ -18,6 +18,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import static com.zoi7.mysql.config.DataConfig.TYPE_CREATE;
+import static com.zoi7.mysql.config.DataConfig.TYPE_NONE;
+import static com.zoi7.mysql.config.DataConfig.TYPE_UPDATE;
+
 public class MYSQL5Dialect {
 
     private static final Logger log = LoggerFactory.getLogger(MYSQL5Dialect.class);
@@ -39,7 +43,7 @@ public class MYSQL5Dialect {
      */
     public void init() {
         try {
-            if ("none".equals(this.config.getType())) {
+            if (TYPE_NONE.equals(this.config.getType())) {
                 return;
             }
             this.connect = this.dataSource.getConnection();
@@ -52,23 +56,23 @@ public class MYSQL5Dialect {
             }
             log.info("MYSQL5Dialect init > packagesSize: {}, auto : {}, classListSize : {}",
                     this.config.getPackages().length, this.config.getType(), clazzSet.size());
-            if ("create".equals(this.config.getType())) {
+            if (TYPE_CREATE.equals(this.config.getType())) {
                 create(clazzSet);
-            } else if ("update".equals(this.config.getType())) {
+            } else if (TYPE_UPDATE.equals(this.config.getType())) {
                 update(clazzSet);
             }
             this.sqlList.addAll(this.alterUpdates);
             Statement statement = this.connect.createStatement();
             for (String sql : this.sqlList) {
                 if (this.config.isShowSql()) {
-                    System.out.println(sql);
+                    log.info(sql);
                 }
-                statement.addBatch(sql);
+                statement.execute(sql);
             }
-            statement.executeBatch();
             this.connect.close();
             log.info("MYSQL5Dialect init finished...");
         } catch (Exception e) {
+            e.printStackTrace();
             log.error("init throw an error", e);
         } finally {
             if (this.connect != null) {
