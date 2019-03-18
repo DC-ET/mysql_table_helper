@@ -146,7 +146,7 @@ public class DataConfig implements Serializable {
                 "driver='" + driver + '\'' +
                 ", url='" + url + '\'' +
                 ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
+                ", password=****" +
                 ", packages=" + Arrays.toString(packages) +
                 ", type='" + type + '\'' +
                 ", showSql=" + showSql +
