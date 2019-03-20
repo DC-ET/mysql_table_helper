@@ -58,7 +58,7 @@ public abstract class AbstractMapperUtils<T extends MapperConfig> {
             case DATETIME:
                 jdbcType = "TIMESTAMP"; break;
             case DATE:
-                jdbcType = "DATA"; break;
+                jdbcType = "DATE"; break;
             case BIGINT:
                 jdbcType = "BIGINT"; break;
             case INTEGER:
