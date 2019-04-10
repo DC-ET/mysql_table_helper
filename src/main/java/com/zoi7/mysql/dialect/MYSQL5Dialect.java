@@ -18,9 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import static com.zoi7.mysql.config.DataConfig.TYPE_CREATE;
-import static com.zoi7.mysql.config.DataConfig.TYPE_NONE;
-import static com.zoi7.mysql.config.DataConfig.TYPE_UPDATE;
+import static com.zoi7.mysql.config.DataConfig.*;
 
 public class MYSQL5Dialect {
 
@@ -89,7 +87,7 @@ public class MYSQL5Dialect {
      * 重新创建表
      * @param clazzSet 表实体列表
      */
-    private void create(Set<Class<?>> clazzSet) {
+    private void create(Set<Class<?>> clazzSet) throws SQLException {
         log.debug("MYSQL5Dialect create...");
         for (Class<?> clazz : clazzSet) {
             Entity entity; // 表实体
@@ -118,7 +116,7 @@ public class MYSQL5Dialect {
      * @param entity 表信息
      * @param clazz 表实体
      */
-    private void createTable(Entity entity, Class<?> clazz) {
+    private void createTable(Entity entity, Class<?> clazz) throws SQLException {
         String tableName = entity.tableName();
         log.debug("MYSQL5Dialect createTable: {}", tableName);
         String idField = null;
@@ -140,8 +138,9 @@ public class MYSQL5Dialect {
             }
             // 如果是id字段 > 标记 & not null
             if (field.isAnnotationPresent(Id.class)) {
-                if (idField == null)
+                if (idField == null) {
                     idField = FieldUtils.getColumn(field, config.isUppercase());
+                }
                 sql.append("\t")
                         .append(FieldUtils.getColumn(field, config.isUppercase()))
                         .append(" ")
@@ -164,7 +163,11 @@ public class MYSQL5Dialect {
         if (idField != null) {
             sql.append(", PRIMARY KEY (").append(idField).append(")");
         }
-        sql.append(") COMMENT \"");
+        // if 存在联合索引
+        if (entity.indices().length > 0) {
+            sql.append(getUniteIndexSql(entity));
+        }
+        sql.append("\n) COMMENT \"");
         sql.append(entity.comment());
         sql.append("\" ;");
         this.sqlList.add(sql.toString());
@@ -258,8 +261,9 @@ public class MYSQL5Dialect {
             if (message != null &&
                     (message.contains("1146") || Pattern.matches("Table '.*' doesn't exist", message))) {
                 return false;
-            } else
+            } else {
                 throw new RuntimeException(e1);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -305,6 +309,51 @@ public class MYSQL5Dialect {
             indexString += "(" + column + ") ";
         }
         return indexString;
+    }
+
+    /**
+     * 获取联合索引对应的 sql语句
+     * @param entity 表实体注解
+     * @return sql
+     */
+    private String getUniteIndexSql(Entity entity) throws SQLException {
+        StringBuilder indexString = new StringBuilder();
+        // 联合索引集合
+        UniteIndex[] indices = entity.indices();
+        for (UniteIndex index : indices) {
+            if (index.columns().length == 0 && index.fields().length == 0) {
+                throw new SQLException("表[" + entity.tableName() + "]联合索引的列名未指定!");
+            }
+            String[] columns = index.columns();
+            String[] fields = index.fields();
+
+            StringBuilder columnSb = new StringBuilder();
+            if (columns.length > 0) {
+                for (int i = 0; i < columns.length; i++) {
+                    columnSb.append(columns[i]);
+                    if (i < columns.length - 1) {
+                        columnSb.append(",");
+                    }
+                }
+            } else {
+                for (int i = 0; i < fields.length; i++) {
+                    columnSb.append(FieldUtils.getColumnByField(fields[i], config.isUppercase()));
+                    if (i < fields.length - 1) {
+                        columnSb.append(",");
+                    }
+                }
+            }
+            indexString.append(",\n\t");
+            indexString.append(index.unique()? "UNIQUE INDEX " : "INDEX ");
+            if (!"".equals(index.name())) {
+                indexString.append(index.name());
+            } else {
+                String cs = columnSb.toString();
+                indexString.append(cs.replace(",", "_").replace(" ", ""));
+            }
+            indexString.append("(").append(columnSb.toString()).append(")");
+        }
+        return indexString.toString();
     }
 
     /**

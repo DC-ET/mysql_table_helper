@@ -20,8 +20,8 @@ public class SimpleTest {
     public void test1() throws IOException, ConfigurationException {
 
 //        // 加载Log4j配置
-//        String log4jPath = this.getClass().getResource("/config/log4j.properties").getPath();
-//        PropertyConfigurator.configure(log4jPath);
+        String log4jPath = this.getClass().getResource("/config/log4j.properties").getPath();
+        PropertyConfigurator.configure(log4jPath);
 //
 //        // 1.以标准配置文件的方式调用初始化
 //        String dbPropertiesPath = this.getClass().getResource("/config/db.properties").getPath();

@@ -1,9 +1,6 @@
 package com.zoi7.mysql.example.entity;
 
-import com.zoi7.mysql.comment.Entity;
-import com.zoi7.mysql.comment.Field;
-import com.zoi7.mysql.comment.FieldType;
-import com.zoi7.mysql.comment.Id;
+import com.zoi7.mysql.comment.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -12,7 +9,9 @@ import java.util.Date;
  * 测试用 > 用户表实体
  * Created by yjy on 2017/9/22.
  */
-@Entity(tableName = "test_user", check = true)
+@Entity(tableName = "test_user", check = true, indices = {
+        @UniteIndex(columns = {"NICK_NAME", "SEX"})
+})
 public class User {
 
     @Id

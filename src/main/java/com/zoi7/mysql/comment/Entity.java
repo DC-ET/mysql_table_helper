@@ -32,5 +32,10 @@ public @interface Entity {
      * @return 表注释
      */
 	String comment() default "";
-	
+
+    /**
+     * @return 联合索引集合 see{@link UniteIndex}
+     */
+	UniteIndex[] indices() default {};
+
 }

@@ -8,7 +8,10 @@ import java.util.Date;
  * @author yjy
  * 2018-05-28 17:49
  */
-@Entity(tableName = "user1", comment = "测试用户表1111")
+@Entity(tableName = "user1", comment = "测试用户表1111", indices = {
+        @UniteIndex(fields = {"username", "sex"}, unique = true),
+        @UniteIndex(name = "customName", fields = {"type", "intToStr"}),
+})
 public class User1 {
 
     @Id(autoIncrease = false)
