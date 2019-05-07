@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import static com.zoi7.mysql.comment.FieldType.*;
 import static com.zoi7.mysql.config.DataConfig.*;
 
 public class MYSQL5Dialect {
@@ -141,10 +142,12 @@ public class MYSQL5Dialect {
                 if (idField == null) {
                     idField = FieldUtils.getColumn(field, config.isUppercase());
                 }
+                FieldType type = FieldUtils.getType(field);
                 sql.append("\t")
                         .append(FieldUtils.getColumn(field, config.isUppercase()))
                         .append(" ")
-                        .append(getTypeLength(FieldUtils.getType(field), fieldAnnotation.length(), fieldAnnotation.decimalLength()))
+                        .append(getTypeLength(type, fieldAnnotation.length(), fieldAnnotation.decimalLength()))
+                        .append(isInteger(type) && fieldAnnotation.unsigned() ? " UNSIGNED " : "")
                         .append(" NOT NULL ");
                 if (FieldUtils.isAutoIncrease(field)) {
                     sql.append(" AUTO_INCREMENT ");
@@ -280,14 +283,15 @@ public class MYSQL5Dialect {
         String column = FieldUtils.getColumn(field, config.isUppercase());
         FieldType type = FieldUtils.getType(field);
         String typeLength = getTypeLength(type, fieldAnnotation.length(), fieldAnnotation.decimalLength());
+        String unsigned = isInteger(type) && fieldAnnotation.unsigned() ? " UNSIGNED " : " ";
         String nullableString = (fieldAnnotation.nullable() ? " " : " NOT NULL ");
         String defVal = FieldUtils.isNumber(type) ? fieldAnnotation.defaultCharValue() : "\"" + fieldAnnotation.defaultCharValue() + "\"";
-        if (defVal.equals("")) {
+        if ("".equals(defVal)) {
             defVal = String.valueOf(fieldAnnotation.defaultValue());
         }
-        String defaultString = (!fieldAnnotation.nullable() ? " default " + defVal : "");
+        String defaultString = (!fieldAnnotation.nullable() ? " DEFAULT " + defVal : " ");
         String comment = " COMMENT \"" + fieldAnnotation.comment() + "\"";
-        return " " + column + " " + typeLength + " " + nullableString + " " + defaultString + " " + comment;
+        return " " + column + typeLength + unsigned + nullableString + defaultString + comment;
     }
 
     /**
@@ -420,6 +424,15 @@ public class MYSQL5Dialect {
             }
         }
         return typeLength;
+    }
+
+    /**
+     * 判断字段类型是否为整数
+     * @param type 字段类型
+     * @return 是否为整数
+     */
+    private boolean isInteger(FieldType type) {
+        return type == BIGINT || type == INT || type == INTEGER || type == TINYINT || type == SMALLINT;
     }
 
 }

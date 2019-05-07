@@ -41,5 +41,7 @@ public class User {
     private BigDecimal gold3;
     @Field(nullable = false, defaultCharValue = "20181218")
     private Date updateTime;
+    @Field(field = "UNSIGNED_INT", type = FieldType.SMALLINT, length = 5, nullable = false, defaultCharValue = "1", index = @Index, unsigned = true, comment = "无符号字段")
+    private Integer unsignedInt;
 
 }
