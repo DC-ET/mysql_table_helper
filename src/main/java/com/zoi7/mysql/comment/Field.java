@@ -68,7 +68,7 @@ public @interface Field {
      * 针对整型字段
      * 注意unsigned可能带来的问题:
      * 1.无法存入负数
-     * 2.两个无符号字段相减时可能会出现意想不到的结果, 如: [a=1, b=2] => a - b = ERROR
+     * 2.两个无符号字段相减时可能会出现意想不到的结果, 如: [a=1, b=2] → a - b = ERROR
      * @return 无符号字段
      */
 	boolean unsigned() default false;
