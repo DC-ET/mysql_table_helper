@@ -31,8 +31,9 @@ public class FieldUtils {
         Field fieldAnnotation = field.getAnnotation(Field.class);
         // 字段名
         String column = fieldAnnotation.field();
-        if ("".equals(column))
+        if ("".equals(column)) {
             column = getColumnByField(field.getName(), uppercase);
+        }
         return column;
     }
 
@@ -76,30 +77,33 @@ public class FieldUtils {
         if (FieldType.AUTO.equals(type)) {
             Class clazz = field.getType();
             // int
-            if (clazz == Integer.class || clazz == int.class)
+            if (clazz == Integer.class || clazz == int.class) {
                 type = FieldType.INTEGER;
+            }
             // long
-            else if (clazz == Long.class || clazz == long.class)
+            else if (clazz == Long.class || clazz == long.class) {
                 type = FieldType.BIGINT;
+            }
             // double
-            else if (clazz == Double.class || clazz == double.class)
+            else if (clazz == Double.class || clazz == double.class) {
                 type = FieldType.DOUBLE;
+            }
             // float
-            else if (clazz == Float.class || clazz == float.class)
+            else if (clazz == Float.class || clazz == float.class) {
                 type = FieldType.FLOAT;
+            }
             // datetime
-            else if (clazz == Date.class || clazz == java.util.Date.class)
+            else if (clazz == Date.class || clazz == java.util.Date.class) {
                 type = FieldType.DATETIME;
+            }
             // decimal
-            else if (clazz == BigDecimal.class)
+            else if (clazz == BigDecimal.class) {
                 type = FieldType.DECIMAL;
+            }
             // 其他
             else {
                 type = FieldType.VARCHAR;
             }
-        }
-        if (type.equals(FieldType.INT)) {
-            type = FieldType.INTEGER;
         }
         return type;
     }
@@ -123,7 +127,7 @@ public class FieldUtils {
      * @return 是否数字
      */
     public static boolean isNumber(FieldType type) {
-        return type.equals(FieldType.INTEGER) || type.equals(FieldType.INT) || type.equals(FieldType.BIGINT)
+        return type.equals(FieldType.INTEGER) || type.equals(FieldType.BIGINT)
                 || type.equals(FieldType.SMALLINT) || type.equals(FieldType.TINYINT) || type.equals(FieldType.FLOAT)
                 || type.equals(FieldType.DOUBLE) || type.equals(FieldType.DECIMAL);
     }

@@ -21,13 +21,13 @@ public class User {
     private String userName;
     @Field(field = "password", type = FieldType.VARCHAR, length = 30)
     private String password;
-    @Field(nullable = false, defaultCharValue = "游客")
+    @Field(nullable = false, defaultValue = "游客")
     private String nickName;
-    @Field(nullable = false, defaultValue = 1)
+    @Field(nullable = false, defaultValue = "1")
     private Integer sex;
-    @Field(nullable = false, defaultCharValue = "8454541456231")
+    @Field(nullable = false, defaultValue = "8454541456231")
     private Long money;
-    @Field(nullable = false, defaultCharValue = "0.98")
+    @Field(nullable = false, defaultValue = "0.98")
     private Double health;
     @Field(nullable = false)
     private BigDecimal gold;
@@ -35,13 +35,13 @@ public class User {
     private Integer sex2;
     @Field(nullable = false)
     private BigDecimal gold2;
-    @Field(nullable = false, defaultValue = 3)
+    @Field(nullable = false, defaultValue = "3")
     private Integer sex3;
-    @Field(nullable = false, defaultCharValue = "55")
+    @Field(nullable = false, defaultValue = "55")
     private BigDecimal gold3;
-    @Field(nullable = false, defaultCharValue = "20181218")
+    @Field(nullable = false, defaultValue = "20181218")
     private Date updateTime;
-    @Field(field = "UNSIGNED_INT", type = FieldType.SMALLINT, length = 5, nullable = false, defaultCharValue = "1", index = @Index, unsigned = true, comment = "无符号字段")
+    @Field(field = "UNSIGNED_INT", type = FieldType.SMALLINT, length = 5, nullable = false, defaultValue = "1", index = @Index, unsigned = true, comment = "无符号字段")
     private Integer unsignedInt;
 
 }

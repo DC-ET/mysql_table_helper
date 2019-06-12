@@ -38,4 +38,9 @@ public @interface Entity {
      */
 	UniteIndex[] indices() default {};
 
+    /**
+     * @return 表编码
+     */
+	String charset() default "";
+
 }

@@ -13,16 +13,93 @@
 
 ## 使用方法
 
-首先要将此Artifact导出为jar, 当然为了让jar包尽可能小, 不要将依赖的jar(如: log4j)一起导出, 防止真实项目中依赖了相同jar而重复依赖.
+一、在你的maven项目中引用依赖:
+```xml
+<!-- 在maven仓库 https://mvnrepository.com/artifact/com.2oi7/mysql-table-helper 查看最新版本 -->
+<dependency>
+    <groupId>com.2oi7</groupId>
+    <artifactId>mysql-table-helper</artifactId>
+    <version>2.4.0</version>
+    <exclusions>
+        <exclusion>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </exclusion>
+        <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
 
-一、你需要有一个配置文件 db.properties ( 后面介绍了一种方式可以不需要配置文件 ), 内容如下图: 
-![image](https://raw.githubusercontent.com/15058126273/mysql_table_helper/master/resources/images/properties1.png)
+二、你需要有一个配置文件 db.properties ( 后面介绍了一种方式可以不需要配置文件 ), 内容如下: 
+```properties
+# 驱动类
+db.driver = com.mysql.cj.jdbc.Driver
+# 数据库地址
+db.url = jdbc:mysql://192.168.1.72:3306/table_helper_test?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT
+# 数据库用户
+db.username = yjy
+# 数据库密码
+db.password = yyyyyy
+
+# 需要扫描的包, 也就是表实体类所在的包, 包地址无需精确, 如下面这个配置也可以直接写成 com.cardgame.manager.entity
+db.packages = com.zoi7.mysql.example
+# create(如果当前存在该表名, 则删除原有表, 然后创建新表, 会丢失数据) or update(如果当前存在该表名, 则更新表字段, 否则创建表)
+db.auto = update
+# 是否打印执行的sql语句
+db.showSql = true
+# 表字段是否大写
+db.uppercase=true
+```
     
-   如果你项目中已经有类似的数据库配置信息, 那么你也可以直接将其拿来封装成 Properties<br/>
-   需要注意的是, Properties中的key需要以上面配置文件的key为标准
+如果你项目中已经有类似的数据库配置信息, 那么你也可以直接将其拿来封装成 Properties<br/>
+需要注意的是, Properties中的key需要以上面配置文件的key为标准
    
    
-二、在项目启动时想尽办法执行以下代码(三选一)
+三、给我们的实体类加上注解, 例子如下:
+```java
+/**
+ * @author yjy
+ * 2018-05-28 17:49
+ */
+@Entity(tableName = "user_utf8mb4", comment = "测试用户表1111", indices = {
+        @UniteIndex(fields = {"username", "sex"}, unique = true),
+        @UniteIndex(name = "customName", fields = {"type", "intToStr"})
+}, charset = "utf8mb4")
+public class UserWithCharset {
+
+    @Id(autoIncrease = false)
+    @Field
+    private Long id;
+    @Field(nullable = false, defaultValue = "hello world")
+    private String username;
+    @Field(length = 30)
+    private String nickName;
+    @Field
+    private Integer sex;
+    @Field(nullable = false, defaultValue = "1")
+    private int type;
+    @Field
+    private Date addTime;
+    @Field
+    private Double money;
+    @Field(type = FieldType.VARCHAR, length = 50)
+    private Integer intToStr;
+    @Field(nullable = false)
+    private Integer notNull;
+    @Field(comment = "测试注释1", index = @Index(name = "uniquetettttttt", unique = true))
+    private String testComment;
+    @Field(comment = "测试注释2", index = @Index(name = "tettttttt", unique = false))
+    private String testComment2;
+    @Field
+    private String testComment3;
+    
+}
+```
+
+四、在项目启动时想尽办法执行以下代码(三选一)
 
 <b>1 > TableInitializer.init(CONFIG_PATH + "db.properties");</b><br/>
 <b>2 > TableInitializer.init(properties).init();</b><br/>
@@ -32,18 +109,16 @@
 
 ### 举个栗子:
 
-* 1.Main函数入口项目, 我们则只需在Main函数适当的地方加上这么一句就好了, 要注意的是, 必须在初始化log4j配置之后
+* 1.Springboot项目, 创建一个实现了 CommandLineRunner 的 Bean, 并增加注解 @Order(Ordered.HIGHEST_PRECEDENCE)
 * 2.Web项目, 我们需要在web.xml中 配置一个监听器(自己实现一个), 在系统启动时, 执行该代码
-* 3.不知道, 自己想办法
-
-三、最后, 给我们的实体类加上注解, 就大功告成了, 例子如下图:
-![image](https://raw.githubusercontent.com/15058126273/mysql_table_helper/master/resources/images/entity1.png)
+* 3.Main函数, 我们则只需在Main函数适当的地方加上这么一句就好了, 要注意的是, 必须在初始化log4j配置之后
 
 ### 调用例子
 
 * [simple example](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/zoi7/mysql/example/main/SimpleTest.java)
 
 * [maven地址](http://mvnrepository.com/artifact/com.2oi7/mysql-table-helper)
+* [github地址](https://github.com/15058126273/mysql_table_helper)
 
 ### 2018-08-14 更新版本 1.0.1
 * 新增Mybatis自动生成mapper.xml工具包 com.yjy.mysql.util.mybatis, 使用方法可以参考[测试例子](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/zoi7/mysql/example/mybatis/SimpleTest.java)
@@ -75,3 +150,11 @@
 
 ### 2019-5-7 更新版本 2.3.0
 * 新增支持注解配置字段无符号, 相关属性 @Field > unsigned
+
+### 2019-6-12 更新版本 2.4.0
+* @Entity注解中新增属性 charset 可为自动创建的表指定字符集
+* @Field注解中的 defaultValue 属性类型更改为 String, 并将 defaultCharValue 属性移除
+* FieldType枚举类移除 INT 类型, 请使用 INTEGER 代替, 功能相同
+* FieldType枚举类新增 TINYTEXT / MEDIUMTEXT / LONGTEXT 类型
+* 修复DATE/DATETIME类型 nullable = false 时不设置默认值无法创建表的问题
+

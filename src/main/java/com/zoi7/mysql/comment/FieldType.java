@@ -7,29 +7,73 @@ package com.zoi7.mysql.comment;
  */
 public enum FieldType {
 
-	AUTO, // 自动匹配类型
-    BIGINT, // 长整数
-    VARCHAR, //字符串
     /**
-     * @deprecated
+     * 自动匹配类型
      */
-    INT, // 整数
-    INTEGER, // 整数
+	AUTO,
     /**
-     * @deprecated
+     * 长整数
      */
-    TINYINT, // 超小整数
-    SMALLINT, // 小整数
-    FLOAT, // 单精度浮点数
-    DOUBLE, // 双精度浮点数
-    DECIMAL, // 小数
+    BIGINT,
     /**
-     * @deprecated
+     * 字符串
      */
-    TEXT, // 文本
-    DATE, // 日期
-    DATETIME, //
-    TIME, // 时间
-    TIMESTAMP, // 时间戳
+    VARCHAR,
+    /**
+     * 整数
+     */
+    INTEGER,
+    /**
+     * 超小整数
+     */
+    TINYINT,
+    /**
+     * 小整数
+     */
+    SMALLINT,
+    /**
+     * 单精度浮点数
+     */
+    FLOAT,
+    /**
+     * 双精度浮点数
+     */
+    DOUBLE,
+    /**
+     * 小数
+     */
+    DECIMAL,
+    /**
+     * 文本
+     */
+    TINYTEXT,
+    /**
+     * 文本
+     */
+    TEXT,
+    /**
+     * 中等文本
+     */
+    MEDIUMTEXT,
+    /**
+     * 长文本
+     */
+    LONGTEXT,
+    /**
+     * 日期
+     */
+    DATE,
+    /**
+     * 日期时间
+     */
+    DATETIME,
+    /**
+     * 时间
+     */
+    TIME,
+    /**
+     * 时间戳
+     */
+    TIMESTAMP,
 
 }

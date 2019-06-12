@@ -172,7 +172,12 @@ public class MYSQL5Dialect {
         }
         sql.append("\n) COMMENT \"");
         sql.append(entity.comment());
-        sql.append("\" ;");
+        sql.append("\" ");
+        // if 指定了编码
+        if (!"".equals(entity.charset())) {
+            sql.append(" DEFAULT CHARSET = ").append(entity.charset());
+        }
+        sql.append(";");
         this.sqlList.add(sql.toString());
     }
 
@@ -252,7 +257,7 @@ public class MYSQL5Dialect {
         PreparedStatement ps;
         ResultSet resultSet;
         try {
-            String sql = "desc " + name;
+            String sql = "DESC " + name;
             ps = this.connect.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             resultSet = ps.executeQuery();
             boolean hasRow = resultSet.last();
@@ -285,11 +290,7 @@ public class MYSQL5Dialect {
         String typeLength = getTypeLength(type, fieldAnnotation.length(), fieldAnnotation.decimalLength());
         String unsigned = isInteger(type) && fieldAnnotation.unsigned() ? " UNSIGNED " : " ";
         String nullableString = (fieldAnnotation.nullable() ? " " : " NOT NULL ");
-        String defVal = FieldUtils.isNumber(type) ? fieldAnnotation.defaultCharValue() : "\"" + fieldAnnotation.defaultCharValue() + "\"";
-        if ("".equals(defVal)) {
-            defVal = String.valueOf(fieldAnnotation.defaultValue());
-        }
-        String defaultString = (!fieldAnnotation.nullable() ? " DEFAULT " + defVal : " ");
+        String defaultString = needDefault(field) ? " DEFAULT \"" + fieldAnnotation.defaultValue() + "\"" : " ";
         String comment = " COMMENT \"" + fieldAnnotation.comment() + "\"";
         return " " + column + typeLength + unsigned + nullableString + defaultString + comment;
     }
@@ -371,35 +372,35 @@ public class MYSQL5Dialect {
         String typeLength;
         switch (type) {
             case BIGINT: {
-                typeLength = " BIGINT(" + Math.min(21, length) + ") ";
+                typeLength = " BIGINT ";
                 break;
             }
             case INTEGER: {
-                typeLength = " INTEGER(" + Math.min(10, length) + ") ";
+                typeLength = " INTEGER ";
                 break;
             }
             case TINYINT: {
-                typeLength = " TINYINT(1) ";
+                typeLength = " TINYINT ";
                 break;
             }
             case SMALLINT: {
-                typeLength = " SMALLINT(" + Math.min(10, length) + ") ";
+                typeLength = " SMALLINT ";
                 break;
             }
             case FLOAT: {
-                typeLength = " FLOAT(" + Math.min(10, length) + ", " + decimalLength + ") ";
+                typeLength = " FLOAT(" + Math.min(255, length) + ", " + Math.min(30, decimalLength) + ") ";
                 break;
             }
             case DOUBLE: {
-                typeLength = " DOUBLE(" + Math.min(10, length) + ", " + decimalLength + ") ";
+                typeLength = " DOUBLE(" + Math.min(255, length) + ", " + Math.min(53, decimalLength) + ") ";
                 break;
             }
             case DECIMAL: {
-                typeLength = " DECIMAL(" + Math.min(10, length) + ", " + decimalLength + ") ";
+                typeLength = " DECIMAL(" + Math.min(65, length) + ", " + Math.min(30, decimalLength) + ") ";
                 break;
             }
             case TEXT: {
-                typeLength = " TEXT(" + length + ") ";
+                typeLength = " TEXT ";
                 break;
             }
             case DATE: {
@@ -419,7 +420,7 @@ public class MYSQL5Dialect {
                 break;
             }
             default: {
-                typeLength = " VARCHAR(" + length + ") ";
+                typeLength = " VARCHAR(" + Math.min(21845, length) + ") ";
                 break;
             }
         }
@@ -432,7 +433,31 @@ public class MYSQL5Dialect {
      * @return 是否为整数
      */
     private boolean isInteger(FieldType type) {
-        return type == BIGINT || type == INT || type == INTEGER || type == TINYINT || type == SMALLINT;
+        return type == BIGINT || type == INTEGER || type == TINYINT || type == SMALLINT;
+    }
+
+    /**
+     * 判断字段类型是否为字符串
+     * @param type 字段类型
+     * @return 是否为字符串
+     */
+    private boolean isChar(FieldType type) {
+        return type == VARCHAR || type == TINYTEXT || type == TEXT || type == MEDIUMTEXT || type == LONGTEXT;
+    }
+
+    /**
+     * 判断是否需要指定默认值
+     * @param field 字段信息
+     * @return 是否需要指定默认值
+     */
+    private boolean needDefault(java.lang.reflect.Field field) {
+        Field fieldAnnotation = field.getAnnotation(Field.class);
+        FieldType type = FieldUtils.getType(field);
+        if (!fieldAnnotation.nullable()) {
+            String defVal = fieldAnnotation.defaultValue();
+            return isChar(type) || !"".equals(defVal);
+        }
+        return false;
     }
 
 }
