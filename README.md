@@ -158,3 +158,5 @@ public class UserWithCharset {
 * FieldType枚举类新增 TINYTEXT / MEDIUMTEXT / LONGTEXT 类型
 * 修复DATE/DATETIME类型 nullable = false 时不设置默认值无法创建表的问题
 
+### 2019-7-10 更新版本 2.5.0
+* 修改AbstractMapperUtils, 当实体类 Entity 注解中的 check = false时, 不生成默认xml文件

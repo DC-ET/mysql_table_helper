@@ -23,8 +23,9 @@ public class DefaultMapperUtils extends AbstractMapperUtils<MapperConfig> {
      * 可通过继承此类并重写此方法来自定义 xml 生成的内容
      * @param clazz 实体类
      * @param config 配置
-     * @return
+     * @return ..
      */
+    @Override
     protected String getXmlString(Class<?> clazz, MapperConfig config) {
         Entity entity = clazz.getAnnotation(Entity.class);
         String tableName = entity.tableName();

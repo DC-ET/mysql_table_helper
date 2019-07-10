@@ -27,12 +27,22 @@ public abstract class AbstractMapperUtils<T extends MapperConfig> {
 
     private void doMakeXml(Class<?> clazz, T config) throws IOException {
         if (clazz.isAnnotationPresent(Entity.class)) {
-            String xml = getXmlString(clazz, config);
-            String fileName = clazz.getSimpleName() + "Mapper.xml";
-            createFile(xml, fileName, config.getXmlOutPut());
+            Entity entity = clazz.getAnnotation(Entity.class);
+            if (entity != null && entity.check()) {
+                String xml = getXmlString(clazz, config);
+                String fileName = clazz.getSimpleName() + "Mapper.xml";
+                createFile(xml, fileName, config.getXmlOutPut());
+            }
         }
     }
 
+    /**
+     * 组装对应的 xml 信息
+     * 可通过继承此类并重写此方法来自定义 xml 生成的内容
+     * @param clazz 实体类
+     * @param config 配置
+     * @return ..
+     */
     protected abstract String getXmlString(Class<?> clazz, T config);
 
     private static void createFile(String xml, String fileName, String xmlOutPut) throws IOException {
