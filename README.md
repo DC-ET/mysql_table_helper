@@ -19,7 +19,7 @@
 <dependency>
     <groupId>com.2oi7</groupId>
     <artifactId>mysql-table-helper</artifactId>
-    <version>2.4.0</version>
+    <version>2.5.0</version>
     <exclusions>
         <exclusion>
             <groupId>org.slf4j</groupId>
