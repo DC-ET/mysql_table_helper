@@ -5,6 +5,7 @@ import com.zoi7.mysql.comment.FieldType;
 import com.zoi7.mysql.comment.Id;
 
 import java.math.BigDecimal;
+import java.sql.Blob;
 import java.sql.Date;
 
 /**
@@ -99,6 +100,10 @@ public class FieldUtils {
             // decimal
             else if (clazz == BigDecimal.class) {
                 type = FieldType.DECIMAL;
+            }
+            // blob
+            else if (clazz == Blob.class) {
+                type = FieldType.BLOB;
             }
             // 其他
             else {

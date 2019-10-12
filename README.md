@@ -160,3 +160,6 @@ public class UserWithCharset {
 
 ### 2019-7-10 更新版本 2.5.0
 * 修改AbstractMapperUtils, 当实体类 Entity 注解中的 check = false时, 不生成默认xml文件
+
+### 2019-10-12 更新版本 2.6.0
+* FieldType增加枚举类型 BIT,CHAR,LONGVARCHAR,CLOB,BLOB

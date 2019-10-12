@@ -12,13 +12,33 @@ public enum FieldType {
      */
 	AUTO,
     /**
+     * 可以取值为 1、0 或 NULL 的 integer 数据类型
+     */
+    BIT,
+    /**
      * 长整数
      */
     BIGINT,
     /**
+     * 定长字符串
+     */
+    CHAR,
+    /**
      * 字符串
      */
     VARCHAR,
+    /**
+     * 字符串
+     */
+    LONGVARCHAR,
+    /**
+     * 二进制大对象，是一个可以存储二进制文件的容器
+     */
+    BLOB,
+    /**
+     * CLOB使用CHAR来保存数据。 　如：保存XML文档。
+     */
+    CLOB,
     /**
      * 整数
      */

@@ -19,7 +19,7 @@ public class SimpleTest {
         // Mapper接口所在包, Mapper接口需要自己写
         String mapperPackage = "com.zoi7.mysql.example.mapper";
         // 指定 mapper.xml 文件保存位置, 需要以 \ 或 / 结尾
-        String xmlOutPut= "E:\\work\\maven\\tableHelper\\target\\";
+        String xmlOutPut= "D:\\JavaWorks\\maven\\mysql_table_helper\\target\\";
 
         // 使用默认的工具进行生成
         Map<String, String> customCachePros = new HashMap<String, String>();

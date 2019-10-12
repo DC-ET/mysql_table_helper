@@ -62,35 +62,14 @@ public abstract class AbstractMapperUtils<T extends MapperConfig> {
      * @return jdbc类型
      */
     public static String getJdbcType(Field field) {
-        String jdbcType ;
         FieldType fieldType = FieldUtils.getType(field);
-        switch (fieldType) {
-            case DATETIME:
-                jdbcType = "TIMESTAMP"; break;
-            case DATE:
-                jdbcType = "DATE"; break;
-            case BIGINT:
-                jdbcType = "BIGINT"; break;
-            case INTEGER:
-                jdbcType = "INTEGER"; break;
-            case VARCHAR:
-                jdbcType = "VARCHAR"; break;
-            case TINYINT:
-                jdbcType = "TINYINT"; break;
-            case DOUBLE:
-                jdbcType = "DOUBLE"; break;
-            case FLOAT:
-                jdbcType = "FLOAT"; break;
-            case DECIMAL:
-                jdbcType = "DECIMAL"; break;
-            case TIME:
-                jdbcType = "TIME"; break;
-            case TIMESTAMP:
-                jdbcType = "TIMESTAMP"; break;
-            default:
-                jdbcType = "VARCHAR"; break;
+        if (fieldType == FieldType.DATETIME) {
+            return "TIMESTAMP";
         }
-        return jdbcType;
+        if (fieldType == FieldType.TINYTEXT || fieldType == FieldType.MEDIUMTEXT || fieldType == FieldType.TEXT || fieldType == FieldType.LONGTEXT) {
+            return "VARCHAR";
+        }
+        return fieldType.toString();
     }
 
 }

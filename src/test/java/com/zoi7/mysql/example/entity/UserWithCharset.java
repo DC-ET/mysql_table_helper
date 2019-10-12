@@ -37,7 +37,7 @@ public class UserWithCharset {
     private String testComment;
     @Field(comment = "测试注释2", index = @Index(name = "tettttttt", unique = false))
     private String testComment2;
-    @Field
+    @Field(type = FieldType.LONGVARCHAR)
     private String testComment3;
 
     public String getTestComment() {
