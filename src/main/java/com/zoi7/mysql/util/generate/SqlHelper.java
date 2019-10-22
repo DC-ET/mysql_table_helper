@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * @author yjy
- * @date 2019/10/12 10:36
+ * 2019/10/12 10:36
  **/
 public class SqlHelper {
     private String url;

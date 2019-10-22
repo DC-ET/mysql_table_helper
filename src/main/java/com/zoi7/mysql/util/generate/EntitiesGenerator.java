@@ -14,7 +14,7 @@ import java.util.*;
 
 /**
  * @author yjy
- * @date 2019/10/12 10:36
+ * 2019/10/12 10:36
  **/
 public class EntitiesGenerator {
 
@@ -161,7 +161,10 @@ public class EntitiesGenerator {
     /**
      * 功能：生成实体类主体代码
      *
-     * @return
+     * @param tablename 表名
+     * @param columns 列集合
+     * @param tableComment 标注释
+     * @return ..
      */
     protected String parse(String tablename, List<Map<String, Object>> columns, String tableComment) {
         StringBuffer sb = new StringBuffer();
@@ -186,7 +189,8 @@ public class EntitiesGenerator {
                 .append("\", check = true)").append(disableAnnotation ? " */" : "").append("\n");
         sb.append("public class ").append(initcap(tablename)).append(" extends BaseEntity {\r\n\n");
         sb.append("\tprivate static final long serialVersionUID = 1L;\n\n");
-        processAllAttrs(sb, columns);// 属性
+        // 属性
+        processAllAttrs(sb, columns);
         sb.append("}");
         return sb.toString();
     }
@@ -194,7 +198,8 @@ public class EntitiesGenerator {
     /**
      * 功能：生成所有属性
      *
-     * @param sb
+     * @param sb ..
+     * @param columns 字段集合
      */
     protected void processAllAttrs(StringBuffer sb, List<Map<String, Object>> columns) {
         for (Map<String, Object> map : columns) {
@@ -248,8 +253,9 @@ public class EntitiesGenerator {
     /**
      * 功能：将输入字符串的首字母改成大写
      *
-     * @param str
-     * @return
+     * @param str ..
+     * @param upperFirst 仅检测首字母
+     * @return ..
      */
     protected static String initcap(String str, boolean upperFirst) {
         str = str.toLowerCase();
@@ -273,8 +279,8 @@ public class EntitiesGenerator {
     /**
      * 功能：获得列的数据类型
      *
-     * @param sqlType
-     * @return
+     * @param sqlType ..
+     * @return ..
      */
     protected String sqlType2JavaType(String sqlType) {
         if ("bit".equalsIgnoreCase(sqlType)) {
@@ -313,8 +319,8 @@ public class EntitiesGenerator {
     /**
      * 功能：获得列的数据类型
      *
-     * @param sqlType
-     * @return
+     * @param sqlType ..
+     * @return ..
      */
     protected FieldType sqlType2FieldType(String sqlType) {
         if ("bit".equalsIgnoreCase(sqlType)) {
