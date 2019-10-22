@@ -115,13 +115,13 @@ public class UserWithCharset {
 
 ### 调用例子
 
-* [simple example](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/zoi7/mysql/example/main/SimpleTest.java)
+* [simple example](src/test/java/com/zoi7/mysql/example/main/UpdateDatabaseTest.java)
 
 * [maven地址](http://mvnrepository.com/artifact/com.2oi7/mysql-table-helper)
 * [github地址](https://github.com/15058126273/mysql_table_helper)
 
 ### 2018-08-14 更新版本 1.0.1
-* 新增Mybatis自动生成mapper.xml工具包 com.yjy.mysql.util.mybatis, 使用方法可以参考[测试例子](https://github.com/15058126273/mysql_table_helper/tree/master/src/test/java/com/zoi7/mysql/example/mybatis/SimpleTest.java)
+* 新增Mybatis自动生成mapper.xml工具包 com.yjy.mysql.util.mybatis, 使用方法可以参考[测试例子](src/test/java/com/zoi7/mysql/example/main/GenerateXmlTest.java)
 
 ### 2018-09-03 更新版本 1.0.2
 * 增强 Mybatis自动生成mapper.xml工具包, 增加配置 自定义二级缓存类 相关的属性; 相关配置: customCachePros
@@ -163,3 +163,6 @@ public class UserWithCharset {
 
 ### 2019-10-12 更新版本 2.6.0
 * FieldType增加枚举类型 BIT,CHAR,LONGVARCHAR,CLOB,BLOB
+
+### 2019-10-22 更新版本 2.7.0
+* 新增根据数据库表结构生成表实体的工具类, 见 [案例](src/test/java/com/zoi7/mysql/example/main/GenerateEntityTest.java)

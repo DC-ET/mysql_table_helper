@@ -1,4 +1,4 @@
-package com.zoi7.mysql.example.mybatis;
+package com.zoi7.mysql.example.main;
 
 import com.zoi7.mysql.util.mybatis.DefaultMapperUtils;
 import com.zoi7.mysql.util.mybatis.MapperConfig;
@@ -11,7 +11,7 @@ import java.util.Map;
  * @author yjy
  * 2018-08-14 12:55
  */
-public class SimpleTest {
+public class GenerateXmlTest {
 
     public static void main(String[] args) throws IOException {
         // 表实体所在包

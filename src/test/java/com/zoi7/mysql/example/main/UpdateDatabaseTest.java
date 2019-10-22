@@ -14,7 +14,7 @@ import java.util.Set;
  * 测试类
  * Created by yjy on 2017/9/22.
  */
-public class SimpleTest {
+public class UpdateDatabaseTest {
 
     @Test
     public void test1() throws IOException, ConfigurationException {
